@@ -79,10 +79,10 @@
     ]
   },
   {
-    "slug": "schema-builder",
-    "name": "Schema Builder",
-    "tagline": "Visual database schema builder.",
-    "description": "Design tables, columns, and relations visually. Generates deterministic SQL from a canonical SchemaIR model with import, autosave, and PGLite playground integration.",
+    "slug": "database-lab",
+    "name": "Database Lab",
+    "tagline": "Visual schema builder with integrated PGLite.",
+    "description": "Design tables, columns, and relations on a canvas, apply DDL to an in-browser Postgres (PGLite), then run SQL queries and browse data. Combines the former Schema Builder and PGLite Playground.",
     "type": "web",
     "platform": "Browser",
     "url": "https://schema-builder.openlearnia.com",
@@ -90,23 +90,8 @@
     "features": [
       "Visual table/column editor with relation edges",
       "Canonical SchemaIR with deterministic SQL generation",
-      "SQL import with unsupported statement preservation",
-      "Local autosave, revision history, and PGLite integration"
-    ]
-  },
-  {
-    "slug": "pglite-playground",
-    "name": "PGLite Playground",
-    "tagline": "Interactive SQL playground with Schema Builder integration.",
-    "description": "Run SQL against PGLite in the browser. Embeds the Schema Builder via a shared runtime adapter for standalone or integrated workflows.",
-    "type": "web",
-    "platform": "Browser",
-    "url": "https://pglite-playground.openlearnia.com",
-    "github": "https://github.com/openlearnia/pglite-playground",
-    "features": [
-      "Interactive SQL playground in the browser",
-      "Schema Builder tab via iframe integration",
-      "Shared runtime adapter for embedded and standalone use"
+      "Integrated PGLite — apply schema, run SQL, browse data",
+      "Local autosave, revision history, and IndexedDB persistence"
     ]
   },
   {

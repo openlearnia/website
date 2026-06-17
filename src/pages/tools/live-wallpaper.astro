@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import tools from '../../data/tools.json';
+
+const tool = tools.find((t) => t.slug === 'live-wallpaper')!;
+---
+<BaseLayout title="Live Wallpaper — Openlearnia" description={tool.tagline}>
+  <h1>{tool.name}</h1>
+  <p>{tool.tagline}</p>
+  <div class="card">
+    <p><strong>Platform:</strong> Windows 10 / 11</p>
+    <p><strong>Source:</strong> <a href={tool.github}>{tool.github}</a></p>
+    <p><strong>Downloads:</strong> <a href={tool.releases}>GitHub Releases</a> (MSI + portable)</p>
+  </div>
+  <h2>Features</h2>
+  <ul>
+    <li>Video, image slideshow, and HTML/WebView2 wallpapers</li>
+    <li>Multi-monitor support and per-display playlists</li>
+    <li>Power profiles, tray controls, and global hotkeys</li>
+  </ul>
+</BaseLayout>

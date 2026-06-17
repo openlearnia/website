@@ -1,0 +1,13 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import tools from '../../data/tools.json';
+---
+<BaseLayout title="Tools — Openlearnia">
+  <h1>Tools</h1>
+  {tools.map((tool) => (
+    <article class="card">
+      <h2><a href={`/tools/${tool.slug}`}>{tool.name}</a></h2>
+      <p>{tool.tagline}</p>
+    </article>
+  ))}
+</BaseLayout>

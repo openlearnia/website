@@ -1,9 +1,127 @@
 [
   {
+    "slug": "image-tools",
+    "name": "Image Tools",
+    "tagline": "Privacy-first image utilities that run entirely in your browser.",
+    "description": "Compress, resize, convert, crop, rotate, strip metadata, watermark, merge, and batch-process images — all on your device via Web Workers. Nothing is uploaded.",
+    "type": "web",
+    "platform": "Browser",
+    "url": "https://image-tools.openlearnia.com",
+    "github": "https://github.com/openlearnia/image-tools",
+    "features": [
+      "Compress, resize, convert, crop, rotate, strip metadata",
+      "Watermark, merge/collage, favicon pack generator",
+      "Batch processing with ZIP download",
+      "All processing happens on your device"
+    ]
+  },
+  {
+    "slug": "json-toolkit",
+    "name": "JSON Toolkit",
+    "tagline": "Format, validate, and minify JSON in the browser.",
+    "description": "Privacy-first JSON utility. Paste or load JSON locally, pretty-print, minify, validate with parser error details, and copy output — no data leaves your browser.",
+    "type": "web",
+    "platform": "Browser",
+    "url": "https://json-toolkit.openlearnia.com",
+    "github": "https://github.com/openlearnia/json-toolkit",
+    "features": [
+      "Paste JSON or load from a local file",
+      "Pretty format and minify JSON",
+      "Validate with line/column error details",
+      "Copy output to clipboard"
+    ]
+  },
+  {
+    "slug": "image-metadata-viewer",
+    "name": "Image Metadata Viewer",
+    "tagline": "Inspect image metadata and EXIF locally.",
+    "description": "Upload images via drag-and-drop or file picker to view filename, size, dimensions, MIME type, and embedded EXIF metadata. Export everything as JSON.",
+    "type": "web",
+    "platform": "Browser",
+    "url": "https://image-metadata-viewer.openlearnia.com",
+    "github": "https://github.com/openlearnia/image-metadata-viewer",
+    "features": [
+      "Drag-and-drop or file picker upload",
+      "Filename, size, dimensions, and MIME type",
+      "EXIF-like embedded metadata parsing",
+      "Export captured metadata as JSON"
+    ]
+  },
+  {
+    "slug": "password-strength-lab",
+    "name": "Password Strength Lab",
+    "tagline": "Password strength analysis and generator.",
+    "description": "Test password strength locally with a 0–100 score, practical improvement tips, and a one-click strong password generator.",
+    "type": "web",
+    "platform": "Browser",
+    "url": "https://password-strength-lab.openlearnia.com",
+    "github": "https://github.com/openlearnia/password-strength-lab",
+    "features": [
+      "Strength score with human-readable rating",
+      "Checklist for length, character types, patterns, and common words",
+      "Actionable suggestions to improve weak passwords",
+      "One-click strong password generator"
+    ]
+  },
+  {
+    "slug": "markdown-editor",
+    "name": "Markdown Editor",
+    "tagline": "Browser-based Markdown workspace with local file storage.",
+    "description": "Write and preview Markdown in the browser with OPFS-backed local persistence. A lightweight workspace for notes and docs.",
+    "type": "web",
+    "platform": "Browser",
+    "url": "https://markdown-editor.openlearnia.com",
+    "github": "https://github.com/openlearnia/markdown-editor",
+    "features": [
+      "Live Markdown preview",
+      "Local file storage via OPFS",
+      "Runs entirely in the browser"
+    ]
+  },
+  {
+    "slug": "schema-builder",
+    "name": "Schema Builder",
+    "tagline": "Visual database schema builder.",
+    "description": "Design tables, columns, and relations visually. Generates deterministic SQL from a canonical SchemaIR model with import, autosave, and PGLite playground integration.",
+    "type": "web",
+    "platform": "Browser",
+    "url": "https://schema-builder.openlearnia.com",
+    "github": "https://github.com/openlearnia/schema-builder",
+    "features": [
+      "Visual table/column editor with relation edges",
+      "Canonical SchemaIR with deterministic SQL generation",
+      "SQL import with unsupported statement preservation",
+      "Local autosave, revision history, and PGLite integration"
+    ]
+  },
+  {
+    "slug": "pglite-playground",
+    "name": "PGLite Playground",
+    "tagline": "Interactive SQL playground with Schema Builder integration.",
+    "description": "Run SQL against PGLite in the browser. Embeds the Schema Builder via a shared runtime adapter for standalone or integrated workflows.",
+    "type": "web",
+    "platform": "Browser",
+    "url": "https://pglite-playground.openlearnia.com",
+    "github": "https://github.com/openlearnia/pglite-playground",
+    "features": [
+      "Interactive SQL playground in the browser",
+      "Schema Builder tab via iframe integration",
+      "Shared runtime adapter for embedded and standalone use"
+    ]
+  },
+  {
     "slug": "live-wallpaper",
     "name": "Live Wallpaper",
     "tagline": "Video, slideshow, and HTML wallpapers behind your desktop icons.",
+    "description": "Windows live wallpaper engine with multi-monitor support, per-display playlists, power profiles, tray controls, and global hotkeys.",
+    "type": "desktop",
+    "platform": "Windows",
     "github": "https://github.com/openlearnia/live-wallpaper",
-    "releases": "https://github.com/openlearnia/live-wallpaper/releases"
+    "releases": "https://github.com/openlearnia/live-wallpaper/releases",
+    "features": [
+      "Video, image slideshow, and HTML/WebView2 wallpapers",
+      "Multi-monitor support and per-display playlists",
+      "Power profiles, tray controls, and global hotkeys"
+    ]
   }
 ]

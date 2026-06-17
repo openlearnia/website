@@ -4,10 +4,53 @@ import tools from '../../data/tools.json';
 ---
 <BaseLayout title="Tools — Openlearnia">
   <h1>Tools</h1>
+  <p>Browser apps and desktop software from the Openlearnia organization.</p>
   {tools.map((tool) => (
     <article class="card">
-      <h2><a href={`/tools/${tool.slug}`}>{tool.name}</a></h2>
+      <div class="card-header">
+        <h2><a href={`/tools/${tool.slug}`}>{tool.name}</a></h2>
+        <span class="badge">{tool.platform}</span>
+      </div>
       <p>{tool.tagline}</p>
+      <p class="card-links">
+        <a href={`/tools/${tool.slug}`}>Details</a>
+        {tool.url && (
+          <>
+            {' · '}
+            <a href={tool.url} target="_blank" rel="noopener noreferrer">Open</a>
+          </>
+        )}
+        {tool.releases && (
+          <>
+            {' · '}
+            <a href={tool.releases} target="_blank" rel="noopener noreferrer">Download</a>
+          </>
+        )}
+      </p>
     </article>
   ))}
 </BaseLayout>
+
+<style>
+  .card-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .card-header h2 {
+    margin: 0;
+  }
+  .badge {
+    font-size: 0.8rem;
+    color: var(--muted);
+    border: 1px solid #2a2f3a;
+    border-radius: 999px;
+    padding: 0.15rem 0.6rem;
+  }
+  .card-links {
+    margin: 0.5rem 0 0;
+    font-size: 0.95rem;
+  }
+</style>

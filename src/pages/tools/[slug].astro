@@ -1,0 +1,90 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import tools from '../../data/tools.json';
+
+export function getStaticPaths() {
+  return tools.map((tool) => ({ params: { slug: tool.slug }, props: { tool } }));
+}
+
+interface Props {
+  tool: (typeof tools)[number];
+}
+
+const { tool } = Astro.props;
+---
+<BaseLayout title={`${tool.name} — Openlearnia`} description={tool.tagline}>
+  <h1>{tool.name}</h1>
+  <p>{tool.tagline}</p>
+  {tool.description && <p>{tool.description}</p>}
+
+  <div class="card">
+    <p><strong>Platform:</strong> {tool.platform}</p>
+    {tool.url && (
+      <p>
+        <strong>Live app:</strong>{' '}
+        <a href={tool.url} target="_blank" rel="noopener noreferrer">{tool.url}</a>
+      </p>
+    )}
+    <p>
+      <strong>Source:</strong>{' '}
+      <a href={tool.github} target="_blank" rel="noopener noreferrer">{tool.github}</a>
+    </p>
+    {tool.releases && (
+      <p>
+        <strong>Downloads:</strong>{' '}
+        <a href={tool.releases} target="_blank" rel="noopener noreferrer">GitHub Releases</a> (MSI + portable)
+      </p>
+    )}
+  </div>
+
+  <p class="actions">
+    {tool.url && (
+      <a class="btn btn-primary" href={tool.url} target="_blank" rel="noopener noreferrer">Open app</a>
+    )}
+    {tool.releases && (
+      <a class="btn btn-primary" href={tool.releases} target="_blank" rel="noopener noreferrer">Download</a>
+    )}
+    <a class="btn" href={tool.github} target="_blank" rel="noopener noreferrer">GitHub</a>
+  </p>
+
+  {tool.features && tool.features.length > 0 && (
+    <>
+      <h2>Features</h2>
+      <ul>
+        {tool.features.map((feature) => <li>{feature}</li>)}
+      </ul>
+    </>
+  )}
+</BaseLayout>
+
+<style>
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 1.25rem 0;
+  }
+  .btn {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    background: var(--surface);
+    border: 1px solid #2a2f3a;
+    text-decoration: none;
+    color: var(--text);
+    font-weight: 500;
+  }
+  .btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #0f1117;
+  }
+  .btn-primary:hover {
+    opacity: 0.9;
+    color: #0f1117;
+  }
+</style>

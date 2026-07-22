@@ -11,8 +11,35 @@ interface Props {
 }
 
 const { tool } = Astro.props;
+
+const description = tool.description ?? tool.tagline;
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: tool.name,
+  description,
+  applicationCategory: tool.type === 'desktop' ? 'DesktopApplication' : 'WebApplication',
+  operatingSystem: tool.platform,
+  url: tool.url ?? `https://openlearnia.com/tools/${tool.slug}`,
+  ...(tool.releases ? { downloadUrl: tool.releases } : {}),
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
+  author: {
+    '@type': 'Organization',
+    name: 'Openlearnia',
+    url: 'https://openlearnia.com',
+  },
+  codeRepository: tool.github,
+};
 ---
-<BaseLayout title={`${tool.name} — Openlearnia`} description={tool.tagline}>
+<BaseLayout
+  title={`${tool.name} — Openlearnia`}
+  description={description}
+  jsonLd={jsonLd}
+>
   <h1>{tool.name}</h1>
   <p>{tool.tagline}</p>
   {tool.description && <p>{tool.description}</p>}

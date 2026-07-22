@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://openlearnia.com/sitemap-index.xml

@@ -2,17 +2,76 @@
 interface Props {
   title: string;
   description?: string;
+  canonicalPath?: string;
+  ogType?: 'website' | 'article';
+  noindex?: boolean;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
-const { title, description = 'Openlearnia — open tools and learning projects.' } = Astro.props;
+const SITE = 'https://openlearnia.com';
+const DEFAULT_DESCRIPTION =
+  'Open-source browser tools and learning projects from Openlearnia — privacy-first utilities you can run today.';
+
+const {
+  title,
+  description = DEFAULT_DESCRIPTION,
+  canonicalPath,
+  ogType = 'website',
+  noindex = false,
+  jsonLd,
+} = Astro.props;
+
+const canonical = new URL(canonicalPath ?? Astro.url.pathname, SITE).href;
+const pageTitle = title.includes('Openlearnia') ? title : `${title} | Openlearnia`;
+
+const defaultJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Openlearnia',
+  url: SITE,
+  description: DEFAULT_DESCRIPTION,
+  publisher: {
+    '@type': 'Organization',
+    name: 'Openlearnia',
+    url: SITE,
+    sameAs: ['https://github.com/openlearnia'],
+  },
+};
+
+const schemas = jsonLd
+  ? Array.isArray(jsonLd)
+    ? jsonLd
+    : [jsonLd]
+  : [defaultJsonLd];
 ---
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
     <meta name="description" content={description} />
-    <title>{title}</title>
+    <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow'} />
+    <link rel="canonical" href={canonical} />
+
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content="Openlearnia" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+
+    <meta name="theme-color" content="#0f1117" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    {schemas.map((schema) => (
+      <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+    ))}
+
     <style is:global>
       :root {
         color-scheme: dark;

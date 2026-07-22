@@ -5,7 +5,25 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   title="About Openlearnia"
   description="Openlearnia builds open-source browser tools and learning resources — privacy-first software you can run today."
 >
-  <h1>About Openlearnia</h1>
-  <p>Openlearnia builds open-source tools and learning resources. Our first shipping product is Live Wallpaper for Windows.</p>
-  <p>Find us on <a href="https://github.com/openlearnia">GitHub</a>.</p>
+  <div class="page-intro reveal">
+    <h1>About Openlearnia</h1>
+    <p>
+      Openlearnia builds open-source tools and learning resources. We ship practical software you can run today —
+      browser utilities that keep your data on your device, plus Windows desktop projects like Live Wallpaper.
+    </p>
+    <p>
+      Every browser tool is free, inspectable on GitHub, and designed so nothing sensitive has to leave your machine.
+    </p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="/tools">Explore tools</a>
+      <a class="btn btn-ghost" href="https://github.com/openlearnia" target="_blank" rel="noopener noreferrer">
+        GitHub
+      </a>
+    </div>
+  </div>
+
+  <div class="trust-strip reveal reveal-delay-1">
+    <span><strong>Mission</strong> — useful software without the surveillance tax</span>
+    <span><strong>Stack</strong> — open source, deployable, readable</span>
+  </div>
 </BaseLayout>

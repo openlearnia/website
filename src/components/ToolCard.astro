@@ -1,0 +1,35 @@
+---
+interface Tool {
+  slug: string;
+  name: string;
+  tagline: string;
+  platform: string;
+  url?: string;
+  releases?: string;
+}
+
+interface Props {
+  tool: Tool;
+  heading?: 'h2' | 'h3';
+}
+
+const { tool, heading = 'h3' } = Astro.props;
+const Heading = heading;
+const primaryHref = tool.url ?? tool.releases ?? `/tools/${tool.slug}`;
+const primaryLabel = tool.url ? 'Open app' : tool.releases ? 'Download' : 'Details';
+---
+<article class="tool-card">
+  <div class="tool-card-top">
+    <Heading>
+      <a href={`/tools/${tool.slug}`}>{tool.name}</a>
+    </Heading>
+    <span class="badge">{tool.platform}</span>
+  </div>
+  <p>{tool.tagline}</p>
+  <div class="tool-card-actions">
+    <a class="btn btn-primary" href={primaryHref} target={tool.url || tool.releases ? '_blank' : undefined} rel={tool.url || tool.releases ? 'noopener noreferrer' : undefined}>
+      {primaryLabel}
+    </a>
+    <a class="btn btn-ghost" href={`/tools/${tool.slug}`}>Details</a>
+  </div>
+</article>

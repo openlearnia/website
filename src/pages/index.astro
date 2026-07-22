@@ -1,63 +1,85 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import ToolCard from '../components/ToolCard.astro';
 import tools from '../data/tools.json';
+
+const browserTools = tools.filter((t) => t.type === 'web');
+const desktopTools = tools.filter((t) => t.type === 'desktop');
 ---
 <BaseLayout
   title="Openlearnia — Open-Source Browser Tools & Learning Projects"
   description="Privacy-first open-source tools you can run today — image utilities, JSON toolkit, Markdown editor, Database Lab, and more."
 >
-  <h1>Open tools for curious builders</h1>
-  <p>
-    Openlearnia publishes practical software you can run today — browser utilities and Windows desktop tools,
-    all open source.
-  </p>
-  <h2>Featured tools</h2>
-  {tools.map((tool) => (
-    <article class="card">
-      <div class="card-header">
-        <h3><a href={`/tools/${tool.slug}`}>{tool.name}</a></h3>
-        <span class="badge">{tool.platform}</span>
+  <section class="hero reveal" aria-labelledby="hero-heading">
+    <p class="brand-mark" aria-hidden="true">Openlearnia</p>
+    <h1 id="hero-heading">Tools that stay on your device</h1>
+    <p class="lede">
+      Privacy-first browser utilities and open-source projects you can run today — no accounts, no uploads, no lock-in.
+    </p>
+    <div class="cta-row reveal-delay-1">
+      <a class="btn btn-primary" href="/tools">Browse tools</a>
+      <a class="btn btn-ghost" href="https://github.com/openlearnia" target="_blank" rel="noopener noreferrer">
+        View on GitHub
+      </a>
+    </div>
+  </section>
+
+  <section class="reveal reveal-delay-2" aria-labelledby="featured-heading">
+    <div class="section-head">
+      <h2 id="featured-heading">Browser tools</h2>
+      <p>{browserTools.length} live apps · process locally</p>
+    </div>
+    <div class="tool-grid">
+      {browserTools.map((tool) => <ToolCard tool={tool} />)}
+    </div>
+  </section>
+
+  {desktopTools.length > 0 && (
+    <section class="reveal reveal-delay-3" aria-labelledby="desktop-heading">
+      <div class="section-head">
+        <h2 id="desktop-heading">Desktop</h2>
+        <p>Windows apps from the same org</p>
       </div>
-      <p>{tool.tagline}</p>
-      <p class="card-links">
-        <a href={`/tools/${tool.slug}`}>Details</a>
-        {tool.url && (
-          <>
-            {' · '}
-            <a href={tool.url} target="_blank" rel="noopener noreferrer">Open</a>
-          </>
-        )}
-        {tool.releases && (
-          <>
-            {' · '}
-            <a href={tool.releases} target="_blank" rel="noopener noreferrer">Download</a>
-          </>
-        )}
-      </p>
-    </article>
-  ))}
+      <div class="tool-grid">
+        {desktopTools.map((tool) => <ToolCard tool={tool} />)}
+      </div>
+    </section>
+  )}
+
+  <div class="trust-strip reveal reveal-delay-3">
+    <span><strong>Local-first</strong> — data stays in your browser</span>
+    <span><strong>Open source</strong> — inspect every line on GitHub</span>
+    <span><strong>Free</strong> — no paywall, no tracking pitch</span>
+  </div>
 </BaseLayout>
 
 <style>
-  .card-header {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1rem;
-    flex-wrap: wrap;
+  .brand-mark {
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 4vw, 2.35rem);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    color: var(--text);
+    margin: 0 0 0.75rem;
+    line-height: 1.1;
   }
-  .card-header h3 {
-    margin: 0;
+
+  .brand-mark::after {
+    content: "";
+    display: inline-block;
+    width: 0.45rem;
+    height: 0.45rem;
+    margin-left: 0.35rem;
+    margin-bottom: 0.15rem;
+    border-radius: 50%;
+    background: var(--accent);
+    vertical-align: baseline;
   }
-  .badge {
-    font-size: 0.8rem;
+
+  .hero h1 {
     color: var(--muted);
-    border: 1px solid #2a2f3a;
-    border-radius: 999px;
-    padding: 0.15rem 0.6rem;
-  }
-  .card-links {
-    margin: 0.5rem 0 0;
-    font-size: 0.95rem;
+    font-weight: 500;
+    font-size: clamp(1.35rem, 3vw, 1.75rem);
+    letter-spacing: -0.02em;
   }
 </style>

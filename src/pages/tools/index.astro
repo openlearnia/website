@@ -1,59 +1,33 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import ToolCard from '../../components/ToolCard.astro';
 import tools from '../../data/tools.json';
 ---
 <BaseLayout
   title="Open-Source Tools — Openlearnia"
   description="Browse Openlearnia's privacy-first browser utilities and Windows desktop tools — all open source."
 >
-  <h1>Tools</h1>
-  <p>Browser apps and desktop software from the Openlearnia organization.</p>
-  {tools.map((tool) => (
-    <article class="card">
-      <div class="card-header">
-        <h2><a href={`/tools/${tool.slug}`}>{tool.name}</a></h2>
-        <span class="badge">{tool.platform}</span>
-      </div>
-      <p>{tool.tagline}</p>
-      <p class="card-links">
-        <a href={`/tools/${tool.slug}`}>Details</a>
-        {tool.url && (
-          <>
-            {' · '}
-            <a href={tool.url} target="_blank" rel="noopener noreferrer">Open</a>
-          </>
-        )}
-        {tool.releases && (
-          <>
-            {' · '}
-            <a href={tool.releases} target="_blank" rel="noopener noreferrer">Download</a>
-          </>
-        )}
-      </p>
-    </article>
-  ))}
-</BaseLayout>
+  <div class="page-intro reveal">
+    <h1>Tools</h1>
+    <p>
+      Browser apps and desktop software from Openlearnia. Most run entirely on your device —
+      nothing leaves unless you choose to share it.
+    </p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="#browser">Jump to browser tools</a>
+      <a class="btn btn-ghost" href="https://github.com/openlearnia" target="_blank" rel="noopener noreferrer">
+        GitHub org
+      </a>
+    </div>
+  </div>
 
-<style>
-  .card-header {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
-  .card-header h2 {
-    margin: 0;
-  }
-  .badge {
-    font-size: 0.8rem;
-    color: var(--muted);
-    border: 1px solid #2a2f3a;
-    border-radius: 999px;
-    padding: 0.15rem 0.6rem;
-  }
-  .card-links {
-    margin: 0.5rem 0 0;
-    font-size: 0.95rem;
-  }
-</style>
+  <section id="browser" class="reveal reveal-delay-1" aria-labelledby="tools-list-heading">
+    <div class="section-head">
+      <h2 id="tools-list-heading">All tools</h2>
+      <p>{tools.length} projects</p>
+    </div>
+    <div class="tool-grid">
+      {tools.map((tool) => <ToolCard tool={tool} heading="h3" />)}
+    </div>
+  </section>
+</BaseLayout>

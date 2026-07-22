@@ -5,6 +5,25 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   title="Learn — Openlearnia"
   description="Learning guides and tutorials from Openlearnia. Content is coming soon — follow us on GitHub for updates."
 >
-  <h1>Learn</h1>
-  <p>Learning content is coming soon. Follow <a href="https://github.com/openlearnia">openlearnia on GitHub</a> for updates.</p>
+  <div class="page-intro reveal">
+    <h1>Learn</h1>
+    <p>
+      Guides and tutorials are on the way. Until then, the best curriculum is the tools themselves —
+      open an app, open the repo, and see how local-first software is built.
+    </p>
+  </div>
+
+  <div class="empty-state reveal reveal-delay-1">
+    <h2>Content coming soon</h2>
+    <p>
+      Follow <a href="https://github.com/openlearnia">openlearnia on GitHub</a> for updates,
+      or jump into a live tool while you wait.
+    </p>
+    <div class="cta-row" style="margin-top: 1.25rem">
+      <a class="btn btn-primary" href="/tools">Browse tools</a>
+      <a class="btn btn-ghost" href="https://github.com/openlearnia" target="_blank" rel="noopener noreferrer">
+        Follow on GitHub
+      </a>
+    </div>
+  </div>
 </BaseLayout>

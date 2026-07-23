@@ -121,7 +121,9 @@ class PlayScene extends Phaser.Scene {
 
     this.paddle = this.physics.add.image(width / 2, height - 48, 'paddle');
     this.paddle.setImmovable(true);
+    this.paddle.setBounce(0);
     this.paddle.body!.allowGravity = false;
+    this.paddle.body!.moves = false; // kinematic: we set x manually; never inherit ball velocity
     this.paddle.setCollideWorldBounds(true);
 
     this.balls = this.physics.add.group({
@@ -199,8 +201,11 @@ class PlayScene extends Phaser.Scene {
     ball.setData('attached', attach);
     if (attach) {
       ball.setVelocity(0, 0);
+      ball.body!.moves = false;
       this.ballLaunched = false;
       this.hintText?.setVisible(true);
+    } else {
+      ball.body!.moves = true;
     }
     return ball;
   }
@@ -235,6 +240,8 @@ class PlayScene extends Phaser.Scene {
   private movePaddleTo(x: number) {
     const half = (this.paddle.displayWidth || 120) / 2;
     this.paddle.x = Phaser.Math.Clamp(x, half, this.scale.width - half);
+    this.paddle.y = this.scale.height - 48;
+    this.paddle.body?.updateFromGameObject();
   }
 
   private tryLaunch() {
@@ -243,6 +250,7 @@ class PlayScene extends Phaser.Scene {
     if (!attached) return;
     const ball = attached as Phaser.Physics.Arcade.Image;
     ball.setData('attached', false);
+    ball.body!.moves = true;
     const speed = this.time.now < this.slowUntil ? 260 : 340;
     const angle = Phaser.Math.DegToRad(Phaser.Math.Between(-55, -125));
     ball.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed);
@@ -251,16 +259,23 @@ class PlayScene extends Phaser.Scene {
   }
 
   private onBallPaddle(
-    ballObj: Phaser.Types.Physics.Arcade.GameObjectWithBody | Phaser.Tilemaps.Tile,
-    paddleObj: Phaser.Types.Physics.Arcade.GameObjectWithBody | Phaser.Tilemaps.Tile,
+    objA: Phaser.Types.Physics.Arcade.GameObjectWithBody | Phaser.Tilemaps.Tile,
+    objB: Phaser.Types.Physics.Arcade.GameObjectWithBody | Phaser.Tilemaps.Tile,
   ) {
-    const ball = ballObj as Phaser.Physics.Arcade.Image;
-    const paddle = paddleObj as Phaser.Physics.Arcade.Image;
-    const rel = (ball.x - paddle.x) / (paddle.displayWidth / 2);
+    // Phaser collide(Group, Sprite) invokes callback as (sprite, groupChild) — paddle first.
+    // Never assume arg order or setVelocity hits the paddle and it flies with the ball.
+    const a = objA as Phaser.Physics.Arcade.Image;
+    const b = objB as Phaser.Physics.Arcade.Image;
+    const ball = a === this.paddle ? b : a;
+    const paddle = this.paddle;
+    if (!ball || ball === paddle) return;
+
+    const rel = Phaser.Math.Clamp((ball.x - paddle.x) / (paddle.displayWidth / 2), -1, 1);
     const angle = Phaser.Math.DegToRad(-90 + rel * 55);
     const speed = Math.max(300, Math.hypot(ball.body!.velocity.x, ball.body!.velocity.y));
     const mul = this.time.now < this.slowUntil ? 0.85 : 1;
     ball.setVelocity(Math.cos(angle) * speed * mul, Math.sin(angle) * speed * mul);
+    paddle.setVelocity(0, 0);
   }
 
   private onBallBrick(
@@ -364,6 +379,10 @@ class PlayScene extends Phaser.Scene {
   update() {
     if (this.ended) return;
 
+    // Classic breakout: paddle locked to bottom rail; only X from input.
+    this.paddle.y = this.scale.height - 48;
+    this.paddle.setVelocity(0, 0);
+
     if (this.time.now > this.wideUntil && this.paddle.scaleX !== 1) {
       this.paddle.setScale(1, 1);
       this.paddle.body!.updateFromGameObject();
@@ -377,8 +396,8 @@ class PlayScene extends Phaser.Scene {
     this.balls.getChildren().forEach((obj) => {
       const ball = obj as Phaser.Physics.Arcade.Image;
       if (ball.getData('attached')) {
-        ball.x = this.paddle.x;
-        ball.y = this.paddle.y - 22;
+        ball.setVelocity(0, 0);
+        ball.setPosition(this.paddle.x, this.paddle.y - 22);
         return;
       }
       if (ball.y > this.scale.height + 20) ball.destroy();
@@ -507,6 +526,8 @@ export function mountCosmicBreaker(host: HTMLElement): () => void {
         overlay.style.display = 'flex';
       },
     };
+    canvasWrap.style.width = '100%';
+    canvasWrap.style.height = '100%';
     game = new Phaser.Game({
       type: Phaser.AUTO,
       parent: canvasWrap,
@@ -523,8 +544,25 @@ export function mountCosmicBreaker(host: HTMLElement): () => void {
         width: W,
         height: H,
       },
+      render: {
+        // So WebGL frames are visible to screenshot tools / first paint after Play.
+        preserveDrawingBuffer: true,
+        antialias: true,
+        powerPreference: 'high-performance',
+      },
+      banner: false,
       scene: [BootScene, PlayScene],
       audio: { noAudio: true },
+    });
+    // Parent may still be laying out when Game boots; refresh so FIT isn't 0×0 until a key.
+    const bootRefresh = () => {
+      if (!game) return;
+      game.scale.refresh();
+      game.canvas?.setAttribute('tabindex', '0');
+    };
+    requestAnimationFrame(() => {
+      bootRefresh();
+      requestAnimationFrame(bootRefresh);
     });
   };
 

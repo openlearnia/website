@@ -1,14 +1,15 @@
-# Horror Ward — Rendering Pipeline (Phase 2)
+# Horror Ward — Pipeline & Play (Three.js)
 
 **Route:** `/games/horror-ward`  
 **Code:** `website/src/games/horror-ward/`  
-**Assets:** `website/public/games/horror-ward/assets/` (`ASSET_INDEX.json`)
+**Assets:** `website/public/games/horror-ward/assets/`  
+**Layout:** see `LAYOUT.md` + `wardMap.ts` (CELL=4 Kenney grid)
 
-This phase makes the Babylon.js **engine + lighting + loader + smoke walk** solid so Phase 3 can implement story/AI without fighting bootstrap.
+## Engine
 
----
+**Three.js only** (Babylon.js removed). PointerLock FPS, FogExp2, SpotLight flashlight, progressive GLB load.
 
-## How to run
+## How to play
 
 ```bash
 cd website
@@ -17,84 +18,54 @@ npm run dev
 # open http://localhost:4321/games/horror-ward
 ```
 
-Smoke controls (after **Enter Ward 7**):
-
 | Input | Action |
 |-------|--------|
 | Click canvas | Pointer lock |
-| WASD / arrows | Walk |
-| Shift | Sprint |
+| WASD | Walk |
+| Shift | Sprint (stamina) |
+| Ctrl / C | Crouch (quieter) |
 | Mouse | Look |
-| **F** (while locked) | Toggle flashlight |
-| Esc | Release pointer |
-| Shell **F** / button | Fullscreen (`src/games/fullscreen.ts`) |
+| F (locked) | Flashlight (battery drains) |
+| E | Interact / hold on UPS |
+| LMB | Stun pulse (costs battery) |
+| 1–4 | Anya Follow / Wait / Hide / Distract |
+| Esc | Pause |
+| Shell F / button | Fullscreen (`attachFullscreen`) |
+
+Screenshot helpers: `?autostart=1&safe=1&at=lobby|nurses|dayroom|sub|theater`
 
 ```bash
-npm run build   # must pass
+npm run build
 ```
 
----
+## Fast Play
 
-## What’s ready
+1. Title shows immediately.
+2. `buildWardLevel({ fastPlay: true })` loads **lobby** phase (gz≤3: lobby + nurses + utility) first.
+3. Play starts; **bay → mid → deep** stream in the background with a progress bar.
+4. Collision uses authored `buildWalkable()` grid — not mesh soup.
 
-| Piece | Path | Notes |
-|-------|------|-------|
-| Engine + scene factory | `engine.ts` | `preserveDrawingBuffer` for screenshots |
-| Horror lighting | `lighting.ts` | Exp fog Act I, green strip + warm safe PointLights, SpotLight flashlight helper, GlowLayer |
-| Shadows | `lighting.ts` | **Flashlight-only** `ShadowGenerator` @ 512 + blur — web-safe; not full cascades |
-| Post mood | `postprocess.ts` | ACES, underexposure, vignette, light bloom, grain |
-| Asset loader | `assets.ts` | Reads `ASSET_INDEX.json`, `SceneLoader` GLB/GLTF, placeholders on miss/FBX |
-| FPS capsule | `player.ts` | Collisions + camera + flashlight mount |
-| Greybox smoke | `smokeScene.ts` | Modular dungeon pieces + Stitcher proxy + lamp + walk |
-| Astro mount | `[slug].astro` + `main.ts` | Fullscreen shell reused |
-| Attribution | `public/games/horror-ward/assets/ATTRIBUTION.md` | Free/CC0 (+ CC-BY footsteps) |
+## Layout system
 
-### Lighting argument (recorded)
+Data-driven floor plan in `wardMap.ts` → `buildWardLevel()` in `level.ts`.  
+Kenney `room-small` is **12×12** — centers sit **2 cells** off the corridor spine.
 
-Hard directional cascades would read “premium horror,” but they tax integrated GPUs and fight our limited-light design. Opponent claim: “no shadows = flat void.” Compromise: **one flashlight shadow map (512)** so silhouettes pop when you aim the beam, without a cascade farm. Quality presets can raise map size in Phase 3.
+## Modules
 
----
+| File | Role |
+|------|------|
+| `wardMap.ts` | Authored tile/prop/light/spawn map + load phases |
+| `level.ts` | Progressive Three.js grid builder |
+| `engine.ts` | WebGLRenderer + scene + camera |
+| `assets.ts` | GLTFLoader + clone cache |
+| `game.ts` | Story loop / endings |
+| `player.ts` / `enemy.ts` / `anya.ts` | FPS + AI |
+| `audio.ts` / `hud.ts` | Beds + UI |
+| `lighting.ts` | Horror mood + flashlight |
 
-## Kenney FBX → GLB
+## Known gaps
 
-**Runtime loads GLB/GLTF only.** Kenney animated FBX under `assets/models/player/kenney-animated/` is **source reference** for Phase 3 locomotion retarget — not imported by the browser loader.
-
-Conversion options (when needed):
-
-```bash
-# If Blender is installed:
-blender --background --python-expr "
-import bpy
-bpy.ops.wm.fbx_import(filepath='idle.fbx')
-bpy.ops.export_scene.gltf(filepath='idle.glb', export_format='GLB')
-"
-
-# Or gltf-pipeline / gltf-transform after an FBX→glTF step:
-npx @gltf-transform/cli copy idle.gltf idle.glb
-```
-
-Smoke test uses capsule + Quaternius GLB proxies — **no FBX conversion required for Phase 2**.
-
----
-
-## Deferred to Phase 3
-
-- Story acts / LEVEL_FLOW scenes (S02+)
-- Ally Anya AI (FOLLOW/WAIT/HIDE/LEAD/DISTRACT) + trust
-- Enemy AI (Stitcher / Warden / Echo) senses & chase
-- Inventory, badges, UPS, journal UI
-- Battery drain, stun pulse, decoys
-- Dedicated FPS arms mesh, true flashlight mesh
-- FBX→GLB anim packs + retarget
-- Audio bed wiring (files exist; not hooked in smoke)
-- Endings A–D
-
----
-
-## Screenshot proof
-
-After visual iteration, store under repo root:
-
-`.audit-screenshots/games/horror-pipeline-*.png`
-
-Expected mood: underexposed greens/cyan accents, readable flashlight cone, **not** bright default Babylon grey.
+- Character meshes are Quaternius proxies  
+- Gallery coop simplified (stair → sub → theater)  
+- Touch controls deferred  
+- No persistent save slot yet

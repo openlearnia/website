@@ -1,55 +1,63 @@
-import { Engine, Scene, Color4, Vector3, FreeCamera } from '@babylonjs/core';
+import * as THREE from 'three';
 
 export type HorrorEngineBundle = {
-  engine: Engine;
-  scene: Scene;
+  renderer: THREE.WebGLRenderer;
+  scene: THREE.Scene;
+  camera: THREE.PerspectiveCamera;
   canvas: HTMLCanvasElement;
+  clock: THREE.Clock;
   dispose: () => void;
 };
 
-/** Create WebGL engine + empty scene with horror-friendly clear color. */
+/** Three.js WebGL host — horror clear color, resize via shell + window. */
 export function createHorrorEngine(host: HTMLElement): HorrorEngineBundle {
   const canvas = document.createElement('canvas');
   canvas.style.cssText = 'display:block;width:100%;height:100%;outline:none;touch-action:none;';
   canvas.setAttribute('tabindex', '0');
   host.replaceChildren(canvas);
 
-  const engine = new Engine(canvas, true, {
-    preserveDrawingBuffer: true,
-    stencil: true,
-    adaptToDeviceRatio: true,
+  const renderer = new THREE.WebGLRenderer({
+    canvas,
     antialias: true,
+    powerPreference: 'high-performance',
   });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setClearColor(0x050a08, 1);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
 
-  const scene = new Scene(engine);
-  scene.clearColor = new Color4(0.02, 0.035, 0.03, 1);
-  scene.autoClear = true;
-  scene.skipPointerMovePicking = true;
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x050a08);
+  scene.fog = new THREE.FogExp2(0x0a1210, 0.028);
 
-  // Placeholder camera so the scene is never empty before smoke mounts
-  const cam = new FreeCamera('bootCam', new Vector3(0, 1.6, 0), scene);
-  cam.minZ = 0.05;
-  cam.maxZ = 80;
+  const camera = new THREE.PerspectiveCamera(70, 1, 0.05, 120);
+  camera.position.set(0, 1.55, 2);
+  scene.add(camera);
 
-  const onResize = () => engine.resize();
-  window.addEventListener('resize', onResize);
-  host.addEventListener('game:resize', onResize);
+  const clock = new THREE.Clock();
 
-  engine.runRenderLoop(() => {
-    if (!scene.activeCamera) return;
-    scene.render();
-  });
+  const resize = () => {
+    const w = Math.max(1, host.clientWidth);
+    const h = Math.max(1, host.clientHeight);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h, false);
+  };
+  resize();
+  window.addEventListener('resize', resize);
+  host.addEventListener('game:resize', resize);
 
   return {
-    engine,
+    renderer,
     scene,
+    camera,
     canvas,
+    clock,
     dispose: () => {
-      window.removeEventListener('resize', onResize);
-      host.removeEventListener('game:resize', onResize);
-      engine.stopRenderLoop();
-      scene.dispose();
-      engine.dispose();
+      window.removeEventListener('resize', resize);
+      host.removeEventListener('game:resize', resize);
+      renderer.dispose();
       canvas.remove();
     },
   };

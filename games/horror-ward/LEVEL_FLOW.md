@@ -1,6 +1,6 @@
 # Horror Ward — Level / Scene Flow
 
-**Streaming model:** One Babylon scene per **major location block**; soft loads between blocks with a black/flicker interstitial (hospital emergency light pulse). Checkpoints are green floor strips inside blocks.
+**Streaming model:** One Three.js scene with a **data-driven Kenney grid** (`wardMap.ts`, CELL=4). Fast Play loads lobby first; soft act gates + fog/audio swaps stand in for per-scene loads. See `LAYOUT.md`.
 
 **Legend:** `→` required transition · `⇢` optional · `✗` fail / death reload · `★` ending.
 

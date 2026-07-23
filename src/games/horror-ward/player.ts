@@ -1,167 +1,239 @@
-import {
-  Scene,
-  FreeCamera,
-  Vector3,
-  MeshBuilder,
-  Mesh,
-  StandardMaterial,
-  Color3,
-  AbstractMesh,
-} from '@babylonjs/core';
+import * as THREE from 'three';
+import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 import type { FlashlightHandle } from './lighting';
 
+export type PlayerSense = {
+  position: THREE.Vector3;
+  forward: THREE.Vector3;
+  noise: number;
+  crouched: boolean;
+  sprinting: boolean;
+  moving: boolean;
+  flashlightOn: boolean;
+};
+
 export type PlayerController = {
-  camera: FreeCamera;
-  body: Mesh;
+  camera: THREE.PerspectiveCamera;
+  body: THREE.Object3D;
+  controls: PointerLockControls;
+  sense: () => PlayerSense;
+  setEnabled: (v: boolean) => void;
+  getBattery: () => number;
+  setBattery: (v: number) => void;
+  getStamina: () => number;
+  pulseStun: () => boolean;
+  dropDecoy: () => THREE.Vector3 | null;
+  onInteractKey: (cb: () => void) => void;
+  onAllyCommand: (cb: (slot: 1 | 2 | 3 | 4) => void) => void;
+  onStunKey: (cb: () => void) => void;
+  struggleTap: () => void;
+  consumeStruggle: () => number;
+  teleport: (pos: THREE.Vector3) => void;
+  update: (dt: number, canStand: (x: number, z: number) => boolean) => void;
   dispose: () => void;
 };
 
 /**
- * Capsule collider + FPS camera + WASD / mouse look.
- * F toggles flashlight (when handle provided). Pointer lock on click.
+ * Capsule-style FPS via PointerLockControls + walkable grid.
  */
 export function createFpsPlayer(
-  scene: Scene,
+  camera: THREE.PerspectiveCamera,
   canvas: HTMLCanvasElement,
   options: {
-    spawn?: Vector3;
+    spawn?: THREE.Vector3;
     flashlight?: FlashlightHandle;
-    eyeHeight?: number;
+    onFootstep?: (loud: boolean) => void;
   } = {},
 ): PlayerController {
-  const spawn = options.spawn ?? new Vector3(0, 0, 0);
-  const eyeHeight = options.eyeHeight ?? 1.55;
+  const spawn = options.spawn ?? new THREE.Vector3(0, 0.85, 2);
+  const eyeStand = 1.55;
+  const eyeCrouch = 1.05;
+  let battery = 100;
+  let stamina = 100;
+  let enabled = true;
+  let footAcc = 0;
+  let decoys = 1;
+  let struggle = 0;
+  let crouched = false;
+  let interactCb: (() => void) | null = null;
+  let allyCb: ((slot: 1 | 2 | 3 | 4) => void) | null = null;
+  let stunCb: (() => void) | null = null;
 
-  const body = MeshBuilder.CreateCapsule(
-    'playerCapsule',
-    { height: 1.7, radius: 0.35, tessellation: 8 },
-    scene,
-  );
-  body.position = spawn.clone();
+  const body = new THREE.Object3D();
+  body.position.copy(spawn);
   body.position.y = 0.85;
-  body.isPickable = false;
-  body.checkCollisions = true;
-  body.ellipsoid = new Vector3(0.35, 0.85, 0.35);
-  body.ellipsoidOffset = new Vector3(0, 0.85, 0);
 
-  const mat = new StandardMaterial('playerCapsuleMat', scene);
-  mat.diffuseColor = new Color3(0.15, 0.2, 0.18);
-  mat.alpha = 0.15;
-  mat.specularColor = Color3.Black();
-  body.material = mat;
-  body.visibility = 0.2;
+  camera.position.set(spawn.x, eyeStand, spawn.z);
+  const controls = new PointerLockControls(camera, canvas);
 
-  const camera = new FreeCamera('fpsCam', spawn.add(new Vector3(0, eyeHeight, 0)), scene);
-  camera.minZ = 0.05;
-  camera.maxZ = 90;
-  camera.fov = 1.05;
-  camera.inertia = 0.4;
-  camera.angularSensibility = 480;
-  camera.speed = 0;
-  camera.checkCollisions = false;
-  camera.applyGravity = false;
-  scene.activeCamera = camera;
-
-  // Attach flashlight under an invisible forward node parented to camera
-  const flashMount = MeshBuilder.CreateBox('flashMount', { size: 0.05 }, scene);
-  flashMount.parent = camera;
-  flashMount.position = new Vector3(0.12, -0.08, 0.2);
-  flashMount.isVisible = false;
-  options.flashlight?.attachTo(flashMount as AbstractMesh);
+  options.flashlight?.attachTo(camera);
 
   const keys: Record<string, boolean> = {};
-  const walkSpeed = 3.2;
-  const sprintMul = 1.55;
-
   const onKeyDown = (e: KeyboardEvent) => {
     keys[e.code] = true;
-    if (e.code === 'KeyF' && !e.metaKey && !e.ctrlKey && !e.altKey) {
-      // Site shell also uses F for fullscreen — only toggle flash when pointer-locked
-      if (document.pointerLockElement === canvas) {
-        e.preventDefault();
-        e.stopPropagation();
-        options.flashlight?.toggle();
-      }
+    if (!enabled) return;
+    if (e.code === 'KeyE') interactCb?.();
+    if (e.code === 'Digit1') allyCb?.(1);
+    if (e.code === 'Digit2') allyCb?.(2);
+    if (e.code === 'Digit3') allyCb?.(3);
+    if (e.code === 'Digit4') allyCb?.(4);
+    if (e.code === 'KeyG') {
+      /* decoy via dropDecoy caller */
+    }
+    if (e.code === 'Space') struggle += 1;
+    // Flashlight: only when pointer locked (shell F = fullscreen)
+    if (e.code === 'KeyF' && document.pointerLockElement === canvas) {
+      e.preventDefault();
+      e.stopPropagation();
+      options.flashlight?.toggle();
+    }
+    if (e.code === 'ControlLeft' || e.code === 'ControlRight' || e.code === 'KeyC') {
+      crouched = true;
     }
   };
   const onKeyUp = (e: KeyboardEvent) => {
     keys[e.code] = false;
-  };
-
-  const requestLock = () => {
-    if (document.pointerLockElement !== canvas) {
-      canvas.requestPointerLock?.();
+    if (e.code === 'ControlLeft' || e.code === 'ControlRight' || e.code === 'KeyC') {
+      crouched = false;
     }
-    canvas.focus();
+  };
+  const onMouseDown = (e: MouseEvent) => {
+    if (!enabled) return;
+    if (e.button === 0 && document.pointerLockElement === canvas) stunCb?.();
+    if (e.button === 0) struggle += 1;
   };
 
-  canvas.addEventListener('click', requestLock);
-  window.addEventListener('keydown', onKeyDown, true);
-  window.addEventListener('keyup', onKeyUp);
+  document.addEventListener('keydown', onKeyDown, true);
+  document.addEventListener('keyup', onKeyUp);
+  canvas.addEventListener('mousedown', onMouseDown);
+  canvas.addEventListener('click', () => {
+    if (enabled) controls.lock();
+  });
 
-  // Mouse look via pointer lock
-  const onMouseMove = (e: MouseEvent) => {
-    if (document.pointerLockElement !== canvas) return;
-    const sens = 0.0022;
-    camera.rotation.y += e.movementX * sens;
-    camera.rotation.x += e.movementY * sens;
-    camera.rotation.x = Math.max(-1.2, Math.min(1.2, camera.rotation.x));
-  };
-  window.addEventListener('mousemove', onMouseMove);
+  const forward = new THREE.Vector3();
+  const right = new THREE.Vector3();
+  const wish = new THREE.Vector3();
+  const pos = new THREE.Vector3();
 
-  const gravity = -9.8;
-  let vy = 0;
-  const groundY = 0.85;
+  const update = (dt: number, canStand: (x: number, z: number) => boolean) => {
+    if (!enabled) return;
 
-  const observer = scene.onBeforeRenderObservable.add(() => {
-    const dt = Math.min(scene.getEngine().getDeltaTime() / 1000, 0.05);
-    const forward = camera.getDirection(Vector3.Forward());
+    const sprinting = keys['ShiftLeft'] || keys['ShiftRight'];
+    const moving =
+      keys['KeyW'] || keys['KeyA'] || keys['KeyS'] || keys['KeyD'] || keys['ArrowUp'] || keys['ArrowDown'];
+
+    if (sprinting && moving && stamina > 0 && !crouched) {
+      stamina = Math.max(0, stamina - 18 * dt);
+    } else {
+      stamina = Math.min(100, stamina + 12 * dt);
+    }
+
+    const speed = crouched ? 1.6 : sprinting && stamina > 0 ? 5.2 : 3.1;
+    camera.getWorldDirection(forward);
     forward.y = 0;
     forward.normalize();
-    const right = camera.getDirection(Vector3.Right());
-    right.y = 0;
-    right.normalize();
+    right.crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
 
-    let move = Vector3.Zero();
-    if (keys['KeyW'] || keys['ArrowUp']) move = move.add(forward);
-    if (keys['KeyS'] || keys['ArrowDown']) move = move.subtract(forward);
-    if (keys['KeyA'] || keys['ArrowLeft']) move = move.subtract(right);
-    if (keys['KeyD'] || keys['ArrowRight']) move = move.add(right);
+    wish.set(0, 0, 0);
+    if (keys['KeyW'] || keys['ArrowUp']) wish.add(forward);
+    if (keys['KeyS'] || keys['ArrowDown']) wish.sub(forward);
+    if (keys['KeyD'] || keys['ArrowRight']) wish.add(right);
+    if (keys['KeyA'] || keys['ArrowLeft']) wish.sub(right);
+    if (wish.lengthSq() > 0) {
+      wish.normalize().multiplyScalar(speed * dt);
+      const nx = camera.position.x + wish.x;
+      const nz = camera.position.z + wish.z;
+      if (canStand(nx, camera.position.z)) camera.position.x = nx;
+      if (canStand(camera.position.x, nz)) camera.position.z = nz;
 
-    const sprint = keys['ShiftLeft'] || keys['ShiftRight'];
-    const speed = walkSpeed * (sprint ? sprintMul : 1);
-
-    if (move.lengthSquared() > 0) {
-      move.normalize();
-      body.moveWithCollisions(move.scale(speed * dt));
+      footAcc += speed * dt;
+      if (footAcc > (crouched ? 1.4 : 1.0)) {
+        footAcc = 0;
+        options.onFootstep?.(sprinting && !crouched);
+      }
     }
 
-    // Simple ground stick (smoke has flat floor)
-    vy += gravity * dt;
-    body.moveWithCollisions(new Vector3(0, vy * dt, 0));
-    if (body.position.y < groundY) {
-      body.position.y = groundY;
-      vy = 0;
-    }
+    const eye = crouched ? eyeCrouch : eyeStand;
+    camera.position.y = THREE.MathUtils.lerp(camera.position.y, eye, 1 - Math.pow(0.001, dt));
+    body.position.set(camera.position.x, 0.85, camera.position.z);
 
-    camera.position.x = body.position.x;
-    camera.position.z = body.position.z;
-    camera.position.y = body.position.y + (eyeHeight - 0.85);
-  });
+    if (options.flashlight?.isEnabled()) {
+      battery = Math.max(0, battery - 2.2 * dt);
+      if (battery <= 0) options.flashlight.setEnabled(false);
+      else options.flashlight.setIntensity(2.2 + (battery / 100) * 1.4);
+    }
+  };
 
   return {
     camera,
     body,
+    controls,
+    sense: () => {
+      camera.getWorldDirection(forward);
+      forward.y = 0;
+      forward.normalize();
+      pos.copy(camera.position);
+      const moving =
+        keys['KeyW'] || keys['KeyA'] || keys['KeyS'] || keys['KeyD'];
+      const sprinting = (keys['ShiftLeft'] || keys['ShiftRight']) && stamina > 0;
+      let noise = 0;
+      if (moving) noise = crouched ? 0.25 : sprinting ? 1 : 0.55;
+      return {
+        position: pos.clone(),
+        forward: forward.clone(),
+        noise,
+        crouched,
+        sprinting: Boolean(sprinting && moving),
+        moving: Boolean(moving),
+        flashlightOn: options.flashlight?.isEnabled() ?? false,
+      };
+    },
+    setEnabled: (v) => {
+      enabled = v;
+      if (!v && document.pointerLockElement) document.exitPointerLock();
+    },
+    getBattery: () => battery,
+    setBattery: (v) => {
+      battery = Math.max(0, Math.min(100, v));
+    },
+    getStamina: () => stamina,
+    pulseStun: () => {
+      if (battery < 12) return false;
+      battery -= 12;
+      return true;
+    },
+    dropDecoy: () => {
+      if (decoys <= 0) return null;
+      decoys -= 1;
+      return camera.position.clone().add(forward.clone().multiplyScalar(2));
+    },
+    onInteractKey: (cb) => {
+      interactCb = cb;
+    },
+    onAllyCommand: (cb) => {
+      allyCb = cb;
+    },
+    onStunKey: (cb) => {
+      stunCb = cb;
+    },
+    struggleTap: () => {
+      struggle += 1;
+    },
+    consumeStruggle: () => {
+      const n = struggle;
+      struggle = 0;
+      return n;
+    },
+    teleport: (p) => {
+      camera.position.set(p.x, eyeStand, p.z);
+      body.position.set(p.x, 0.85, p.z);
+    },
+    update,
     dispose: () => {
-      scene.onBeforeRenderObservable.remove(observer);
-      window.removeEventListener('keydown', onKeyDown, true);
-      window.removeEventListener('keyup', onKeyUp);
-      window.removeEventListener('mousemove', onMouseMove);
-      canvas.removeEventListener('click', requestLock);
-      if (document.pointerLockElement === canvas) document.exitPointerLock?.();
-      flashMount.dispose();
-      body.dispose();
-      camera.dispose();
+      document.removeEventListener('keydown', onKeyDown, true);
+      document.removeEventListener('keyup', onKeyUp);
+      canvas.removeEventListener('mousedown', onMouseDown);
+      controls.dispose();
     },
   };
 }

@@ -7,7 +7,8 @@
     "dimension": "2D",
     "controls": "Arrow keys / A-D or drag to move · Space / tap to launch · F or Fullscreen button",
     "thumbnail": "/games/thumbs/cosmic-breaker.svg",
-    "status": "playable"
+    "status": "playable",
+    "tags": ["game", "2d", "arcade", "phaser", "breaker"]
   },
   {
     "slug": "ring-runner",
@@ -17,16 +18,18 @@
     "dimension": "3D",
     "controls": "Arrow keys / WASD or tilt stick · Space / tap to boost · F or Fullscreen button",
     "thumbnail": "/games/thumbs/ring-runner.svg",
-    "status": "playable"
+    "status": "playable",
+    "tags": ["game", "3d", "flight", "threejs", "space"]
   },
   {
     "slug": "horror-ward",
     "name": "Horror Ward",
-    "tagline": "Ashford Ward 7 — Babylon.js stealth-horror pipeline smoke (flashlight, fog, modular dungeon).",
-    "framework": "Babylon.js",
+    "tagline": "Ashford Ward 7 — Three.js stealth-horror on an authored Kenney grid.",
+    "framework": "Three.js",
     "dimension": "3D",
-    "controls": "WASD move · mouse look · Shift sprint · F flashlight (pointer-locked) · fullscreen via shell button",
+    "controls": "WASD · mouse · Shift sprint · Ctrl crouch · F light · E interact · LMB stun · Esc pause · shell fullscreen",
     "thumbnail": "/games/thumbs/horror-ward.svg",
-    "status": "pipeline"
+    "status": "playable",
+    "tags": ["game", "3d", "horror", "stealth", "threejs"]
   }
 ]

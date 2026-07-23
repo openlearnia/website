@@ -6,6 +6,7 @@ import { spawnAnya, type AnyaActor } from './anya';
 import { createAudioDirector } from './audio';
 import { createHud } from './hud';
 import { createInitialState, canReachEndingC, type GameState, type EndingId } from './state';
+import { loadGlobalLightPref, saveGlobalLightPref } from './lighting';
 
 export type GameHandle = {
   state: GameState;
@@ -56,12 +57,21 @@ export async function mountHorrorGame(
   loadBar.append('Preparing Ward 7…', loadFillWrap);
   host.appendChild(loadBar);
 
-  hud.showTitle(() => {
-    startPending = true;
-    hud.hideTitle();
-    void audio.resume();
-    hud.setSubtitle('Click canvas to look · loading lobby first…', 6000);
-  });
+  hud.showTitle(
+    () => {
+      startPending = true;
+      hud.hideTitle();
+      void audio.resume();
+      hud.setSubtitle('Click canvas to look · loading lobby first…', 6000);
+    },
+    {
+      globalLight: loadGlobalLightPref(),
+      onGlobalLightChange: (on) => {
+        saveGlobalLightPref(on);
+        level?.lighting.setGlobalLighting(on);
+      },
+    },
+  );
 
   const cleanupActors = () => {
     cancelAnimationFrame(raf);
@@ -356,6 +366,44 @@ export async function mountHorrorGame(
         loadBar.firstChild && (loadBar.childNodes[0].textContent = p.label);
       },
     });
+    level.lighting.setGlobalLighting(loadGlobalLightPref());
+    // Playtest/debug probe — read intensities without digging through Three internals.
+    (window as unknown as {
+      __horrorWardLight?: () => { on: boolean; hemi: number; ambient: number; fill: number };
+      __horrorWardDebug?: () => Record<string, unknown>;
+    }).__horrorWardLight = () => ({
+      on: level!.lighting.isGlobalLighting(),
+      hemi: level!.lighting.hemi.intensity,
+      ambient: level!.lighting.ambient.intensity,
+      fill: level!.lighting.fill.intensity,
+    });
+    (window as unknown as { __horrorWardDebug?: () => Record<string, unknown> }).__horrorWardDebug = () => {
+      let meshes = 0;
+      let standards = 0;
+      let basics = 0;
+      level!.root.traverse((o) => {
+        const m = o as THREE.Mesh;
+        if (!m.isMesh) return;
+        meshes += 1;
+        const mat = m.material;
+        const mats = Array.isArray(mat) ? mat : [mat];
+        for (const x of mats) {
+          if (!x) continue;
+          if ((x as THREE.MeshStandardMaterial).isMeshStandardMaterial) standards += 1;
+          if ((x as THREE.MeshBasicMaterial).isMeshBasicMaterial) basics += 1;
+        }
+      });
+      return {
+        cam: { x: camera.position.x, y: camera.position.y, z: camera.position.z },
+        children: level!.root.children.length,
+        meshes,
+        standards,
+        basics,
+        fog: scene.fog instanceof THREE.FogExp2 ? scene.fog.density : null,
+        light: level!.lighting.isGlobalLighting(),
+        battery: player?.getBattery() ?? null,
+      };
+    };
 
     // Lobby ready — hide bar once play starts; stream continues
     const spawnPlayer = level.spawns.player ?? new THREE.Vector3(0, 0.85, 2);
@@ -363,6 +411,7 @@ export async function mountHorrorGame(
       spawn: spawnPlayer,
       flashlight: level.lighting.flashlight,
       onFootstep: (loud) => audio.playSfx(loud ? 'foot' : 'footSoft', { volume: loud ? 0.35 : 0.22 }),
+      skipBatteryDrain: () => level?.lighting.isGlobalLighting() ?? false,
     });
     player.setBattery(state.resources.battery);
 
@@ -466,6 +515,7 @@ export async function mountHorrorGame(
         state.paused = !state.paused;
         if (state.paused) {
           player?.setEnabled(false);
+          if (document.pointerLockElement) document.exitPointerLock?.();
           hud.setPaused(
             true,
             () => {
@@ -475,7 +525,18 @@ export async function mountHorrorGame(
               canvas.requestPointerLock?.();
             },
             () => void restart(),
+            {
+              globalLight: level?.lighting.isGlobalLighting() ?? loadGlobalLightPref(),
+              onGlobalLightChange: (on) => {
+                if (level) level.lighting.setGlobalLighting(on);
+                else saveGlobalLightPref(on);
+              },
+            },
           );
+        } else {
+          hud.setPaused(false, () => undefined, () => undefined);
+          player?.setEnabled(true);
+          canvas.requestPointerLock?.();
         }
       }
     };

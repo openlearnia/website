@@ -43,6 +43,8 @@ export function createFpsPlayer(
     spawn?: THREE.Vector3;
     flashlight?: FlashlightHandle;
     onFootstep?: (loud: boolean) => void;
+    /** When true, skip flashlight battery drain (global fill already lights the ward). */
+    skipBatteryDrain?: () => boolean;
   } = {},
 ): PlayerController {
   const spawn = options.spawn ?? new THREE.Vector3(0, 0.85, 2);
@@ -157,10 +159,13 @@ export function createFpsPlayer(
     camera.position.y = THREE.MathUtils.lerp(camera.position.y, eye, 1 - Math.pow(0.001, dt));
     body.position.set(camera.position.x, 0.85, camera.position.z);
 
-    if (options.flashlight?.isEnabled()) {
+    if (options.flashlight?.isEnabled() && !options.skipBatteryDrain?.()) {
       battery = Math.max(0, battery - 2.2 * dt);
       if (battery <= 0) options.flashlight.setEnabled(false);
       else options.flashlight.setIntensity(2.2 + (battery / 100) * 1.4);
+    } else if (options.flashlight?.isEnabled()) {
+      // Global fill is the hero — keep the cone as a soft accent, not a white blowout.
+      options.flashlight.setIntensity(1.15);
     }
   };
 

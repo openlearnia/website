@@ -142,7 +142,7 @@ export async function buildWardLevel(
     for (const l of lightsInPhase(map, phase)) {
       const pl = makeRoomLight(l);
       root.add(pl);
-      lighting.roomLights.push(pl);
+      lighting.addRoomLight(pl);
     }
   };
 
@@ -280,6 +280,7 @@ export async function buildWardLevel(
     },
     canStand,
     dispose: () => {
+      lighting.dispose();
       scene.remove(root);
       root.traverse((o) => {
         const m = o as THREE.Mesh;

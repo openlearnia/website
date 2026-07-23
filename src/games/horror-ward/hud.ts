@@ -16,9 +16,14 @@ export type DialogueChoice = {
   label: string;
 };
 
+export type HudSettings = {
+  globalLight: boolean;
+  onGlobalLightChange: (on: boolean) => void;
+};
+
 export type HudApi = {
   root: HTMLElement;
-  showTitle: (onStart: () => void) => void;
+  showTitle: (onStart: () => void, settings?: HudSettings) => void;
   hideTitle: () => void;
   setObjective: (text: string, flash?: boolean) => void;
   setSubtitle: (text: string, ms?: number) => void;
@@ -26,7 +31,7 @@ export type HudApi = {
   setBattery: (v: number) => void;
   setStamina: (v: number, show: boolean) => void;
   setAlly: (mode: string, fear: string) => void;
-  setPaused: (on: boolean, onResume: () => void, onRestart: () => void) => void;
+  setPaused: (on: boolean, onResume: () => void, onRestart: () => void, settings?: HudSettings) => void;
   showDialogue: (
     speaker: string,
     lines: string[],
@@ -133,6 +138,41 @@ export function createHud(host: HTMLElement): HudApi {
     return b;
   };
 
+  const mkGlobalLightToggle = (settings: HudSettings): HTMLElement => {
+    const wrap = el('div', `
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      margin:0 0 14px;padding:10px 12px;border:1px solid ${UI.border};border-radius:8px;
+      text-align:left;background:rgba(0,0,0,.25);
+    `);
+    const copy = el('div', `flex:1;min-width:0`);
+    const label = el('div', `font-size:0.88rem;color:${UI.text};font-weight:500`);
+    label.textContent = 'Enable global lighting';
+    const hint = el('div', `font-size:0.72rem;color:${UI.muted};margin-top:3px`);
+    hint.textContent = 'Brighter ward fill for casual play / debugging';
+    copy.append(label, hint);
+
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.setAttribute('role', 'switch');
+    toggle.setAttribute('aria-checked', settings.globalLight ? 'true' : 'false');
+    toggle.setAttribute('aria-label', 'Enable global lighting');
+    const paint = (on: boolean) => {
+      toggle.setAttribute('aria-checked', on ? 'true' : 'false');
+      toggle.textContent = on ? 'On' : 'Off';
+      toggle.style.cssText = on
+        ? `flex-shrink:0;min-width:52px;min-height:34px;padding:0 10px;border:none;border-radius:8px;cursor:pointer;background:${UI.accent};color:#0a1210;font:600 13px/1 inherit;`
+        : `flex-shrink:0;min-width:52px;min-height:34px;padding:0 10px;border:1px solid ${UI.border};border-radius:8px;cursor:pointer;background:transparent;color:${UI.muted};font:500 13px/1 inherit;`;
+    };
+    paint(settings.globalLight);
+    toggle.addEventListener('click', () => {
+      const next = toggle.getAttribute('aria-checked') !== 'true';
+      paint(next);
+      settings.onGlobalLightChange(next);
+    });
+    wrap.append(copy, toggle);
+    return wrap;
+  };
+
   const clearModal = () => {
     modalHost.style.display = 'none';
     while (modalHost.firstChild) modalHost.removeChild(modalHost.firstChild);
@@ -146,7 +186,7 @@ export function createHud(host: HTMLElement): HudApi {
 
   return {
     root,
-    showTitle(onStart) {
+    showTitle(onStart, settings) {
       const p = makePanel();
       const eyebrow = el('div', `font-size:0.72rem;letter-spacing:.16em;text-transform:uppercase;color:${UI.accent};margin-bottom:8px`);
       eyebrow.textContent = 'Ashford Memorial · Ward 7';
@@ -154,11 +194,13 @@ export function createHud(host: HTMLElement): HudApi {
       title.textContent = 'Horror Ward';
       const tag = el('p', `margin:0 0 8px;color:${UI.muted};font-size:0.92rem`);
       tag.textContent = 'The night shift is a story someone wrote on your badge.';
-      const help = el('p', `margin:0 0 18px;color:${UI.muted};font-size:0.82rem`);
+      const help = el('p', `margin:0 0 14px;color:${UI.muted};font-size:0.82rem`);
       help.textContent = 'WASD · mouse · Shift sprint · Ctrl crouch · F light · E interact · 1–4 Anya · Esc pause';
+      p.append(eyebrow, title, tag, help);
+      if (settings) p.appendChild(mkGlobalLightToggle(settings));
       const start = mkBtn('Enter Ward 7', true);
       start.addEventListener('click', () => onStart());
-      p.append(eyebrow, title, tag, help, start);
+      p.append(start);
       showModal(p);
     },
     hideTitle: clearModal,
@@ -201,7 +243,7 @@ export function createHud(host: HTMLElement): HudApi {
     setAlly(mode, fear) {
       ally.textContent = `Anya · ${mode} · ${fear}`;
     },
-    setPaused(on, onResume, onRestart) {
+    setPaused(on, onResume, onRestart, settings) {
       if (!on) {
         clearModal();
         return;
@@ -209,13 +251,15 @@ export function createHud(host: HTMLElement): HudApi {
       const p = makePanel();
       const h = el('h2', `margin:0 0 8px;font-size:1.25rem;color:#e8f0ea`);
       h.textContent = 'Paused';
-      const sub = el('p', `margin:0 0 16px;color:${UI.muted};font-size:0.88rem`);
+      const sub = el('p', `margin:0 0 14px;color:${UI.muted};font-size:0.88rem`);
       sub.textContent = 'The dark waits. So do they.';
+      p.append(h, sub);
+      if (settings) p.appendChild(mkGlobalLightToggle(settings));
       const resume = mkBtn('Resume', true);
       resume.addEventListener('click', onResume);
       const restart = mkBtn('Restart', false);
       restart.addEventListener('click', onRestart);
-      p.append(h, sub, resume, restart);
+      p.append(resume, restart);
       showModal(p);
     },
     showDialogue(speaker, lines, choices, onChoice) {

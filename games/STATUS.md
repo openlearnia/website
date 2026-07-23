@@ -11,6 +11,7 @@
 | `/games` | Hub | Astro | Cards, thumbs, nav + homepage link |
 | `/games/cosmic-breaker` | Cosmic Breaker | Phaser **3.87** | 2D neon brick-breaker; HTML start/over overlays |
 | `/games/ring-runner` | Ring Runner | Three.js | Small 3D ring-flight demo — **do not expand into horror epic** |
+| `/games/horror-ward` | Horror Ward | Babylon.js | Phase 2 pipeline smoke — lighting/loader/FPS walk; gameplay Phase 3 |
 | (shell) | Fullscreen | `src/games/fullscreen.ts` | Button + `F` + double-click; Fullscreen API with CSS fallback |
 
 Also: SEO via `BaseLayout`, `public/games/ATTRIBUTION.md` (procedural assets), Games nav in header/footer.

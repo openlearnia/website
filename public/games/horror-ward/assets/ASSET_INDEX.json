@@ -1,0 +1,1458 @@
+{
+  "project": "horror-ward",
+  "phase": 1,
+  "root": "website/public/games/horror-ward/assets",
+  "generated": "2026-07-23",
+  "notes": [
+    "FPS arms: capsule + SpotLight (models/player/FPS_PLACEHOLDER.md)",
+    "Character roles are Quaternius proxies pending dedicated Anya/Stitcher/Warden/Echo",
+    "Flashlight mesh is lamp proxy; dedicated PROP-FLASHLIGHT still open",
+    "CC-BY-3.0: congusbongus footsteps pack \u2014 attribution required"
+  ],
+  "counts": {
+    "files": 173,
+    "by_type": {
+      "audio": 24,
+      "hdri": 1,
+      "model": 88,
+      "license": 2,
+      "texture": 46,
+      "doc": 1,
+      "model-buffer": 11
+    }
+  },
+  "assets": [
+    {
+      "path": "audio/music/ambient-ancient-caverns.ogg",
+      "type": "audio",
+      "license": "CC0",
+      "source": "congusbongus",
+      "intended_use": "Explore drone",
+      "manifest_id": "MUS-EXPLORE",
+      "bytes": 3328494
+    },
+    {
+      "path": "audio/music/ambient-sci-fi-horror.mp3",
+      "type": "audio",
+      "license": "CC0",
+      "source": "Joth",
+      "intended_use": "Sci-fi horror bed / Act III",
+      "manifest_id": "MUS-ECHO",
+      "bytes": 1182741
+    },
+    {
+      "path": "audio/sfx/ambient-drone-loop-01.ogg",
+      "type": "audio",
+      "license": "CC0",
+      "source": "rubberduck 100 CC0 SFX #2",
+      "intended_use": "Ambient drone / HVAC bed",
+      "manifest_id": "SFX-HVAC-BED",
+      "bytes": 200436
+    },
+    {
+      "path": "audio/sfx/ambient-drone-loop-02.ogg",
+      "type": "audio",
+      "license": "CC0",
+      "source": "rubberduck 100 CC0 SFX #2",
+      "intended_use": "SFX",
+      "bytes": 183679
+    },
+    {
+      "path": "audio/sfx/breath.mp3",
+      "type": "audio",
+      "license": "CC0",
+      "source": "Neostead",
+      "intended_use": "Breath bed (calm/tension)",
+      "manifest_id": "SFX-HEART",
+      "bytes": 8504937
+    },
+    {
+      "path": "audio/sfx/chase-cue-thunder.ogg",
+      "type": "audio",
+      "license": "CC0",
+      "source": "rubberduck 100 CC0 SFX #2",
+      "intended_use": "Chase / alert cue",
+      "manifest_id": "SFX-CHASE-START",
+      "bytes": 51493
+    },
+    {
+      "path": "audio/sfx/door-creak-01.ogg",
+      "type": "audio",
+      "license": "CC0",
+      "source": "rubberduck 100 CC0 SFX #2",
+      "intended_use": "Door creak",
+      "manifest_id": "SFX-DOOR",
+      "bytes": 9219
+    },
+    {
+      "path": "audio/sfx/door-creak-02.ogg",
+      "type": "audio",
+      "license": "CC0",
+      "source": "rubberduck 100 CC0 SFX #2",
+      "intended_use": "SFX",
+      "bytes": 7694
+    },
+    {
+      "path": "audio/sfx/door-creak-heavy-close.ogg",
+      "type": "audio",
+      "license": "CC0",
+      "source": "qubodup Door Set",
+      "intended_use": "SFX",
+      "bytes": 17252
+    },
+    {
+      "path": "audio/sfx/door-creak-heavy-open.ogg",
+      "type": "audio",
+      "license": "CC0",
+      "source": "qubodup Door Set",
+      "intended_use": "Heavy door open",
+      "manifest_id": "SFX-DOOR",
+      "bytes": 17130
+    },
+    {
+      "path": "audio/sfx/door-open.ogg",
+      "type": "audio",
+      "license": "CC0",
+      "source": "rubberduck / OGA",
+      "intended_use": "SFX",
+      "bytes": 17265
+    },
+    {
+      "path": "audio/sfx/footstep-01.ogg",
+      "type": "audio",
+      "license": "CC0",
+      "source": "rubberduck 100 CC0 SFX #2",
+      "intended_use": "Player footstep",
+      "manifest_id": "SFX-FOOT-PLAYER",
+      "bytes": 8134
+    },
+    {
+      "path": "audio/sfx/footstep-02.ogg",
+      "type": "audio",
+      "license": "CC0",
+      "source": "rubberduck 100 CC0 SFX #2",
+      "intended_use": "SFX",
+      "bytes": 8318
+    },
+    {
+      "path": "audio/sfx/footstep-cloth-01.ogg",
+      "type": "audio",
+      "license": "CC-BY-3.0",
+      "source": "congusbongus footsteps pack",
+      "intended_use": "Soft cloth step proxy",
+      "manifest_id": "SFX-FOOT-STITCHER",
+      "bytes": 8748
+    },
+    {
+      "path": "audio/sfx/footstep-metal-01.ogg",
+      "type": "audio",
+      "license": "CC-BY-3.0",
+      "source": "congusbongus footsteps pack",
+      "intended_use": "Boot/metal step",
+      "manifest_id": "SFX-FOOT-WARDEN",
+      "bytes": 7253
+    },
+    {
+      "path": "audio/sfx/footstep-metal-02.ogg",
+      "type": "audio",
+      "license": "CC-BY-3.0",
+      "source": "congusbongus footsteps pack",
+      "intended_use": "SFX",
+      "bytes": 7171
+    },
+    {
+      "path": "audio/sfx/footstep-wood-01.ogg",
+      "type": "audio",
+      "license": "CC0",
+      "source": "rubberduck 100 CC0 SFX #2",
+      "intended_use": "SFX",
+      "bytes": 7391
+    },
+    {
+      "path": "audio/sfx/keys-jingle.ogg",
+      "type": "audio",
+      "license": "CC0",
+      "source": "rubberduck / OGA",
+      "intended_use": "SFX",
+      "bytes": 18061
+    },
+    {
+      "path": "audio/sfx/lock-open.ogg",
+      "type": "audio",
+      "license": "CC0",
+      "source": "rubberduck / OGA",
+      "intended_use": "SFX",
+      "bytes": 33021
+    },
+    {
+      "path": "audio/sfx/metal-door-close.ogg",
+      "type": "audio",
+      "license": "CC0",
+      "source": "rubberduck / OGA",
+      "intended_use": "SFX",
+      "bytes": 29099
+    },
+    {
+      "path": "audio/sfx/metal-door-open.ogg",
+      "type": "audio",
+      "license": "CC0",
+      "source": "rubberduck / OGA",
+      "intended_use": "SFX",
+      "bytes": 47159
+    },
+    {
+      "path": "audio/sfx/sting-hit-01.ogg",
+      "type": "audio",
+      "license": "CC0",
+      "source": "rubberduck 100 CC0 SFX #2",
+      "intended_use": "Short stinger",
+      "manifest_id": "SFX-ECHO-MANIFEST",
+      "bytes": 7903
+    },
+    {
+      "path": "audio/sfx/sting-hit-02.ogg",
+      "type": "audio",
+      "license": "CC0",
+      "source": "rubberduck 100 CC0 SFX #2",
+      "intended_use": "SFX",
+      "bytes": 6766
+    },
+    {
+      "path": "audio/sfx/wood-squeak.ogg",
+      "type": "audio",
+      "license": "CC0",
+      "source": "rubberduck / OGA",
+      "intended_use": "SFX",
+      "bytes": 21785
+    },
+    {
+      "path": "env/studio_small_09_1k.hdr",
+      "type": "hdri",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "Dim interior HDRI",
+      "manifest_id": "HDR-INTERIOR-DIM",
+      "bytes": 1615248
+    },
+    {
+      "path": "models/ally/astronaut-variant.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Quaternius",
+      "intended_use": "character / NPC",
+      "bytes": 733432
+    },
+    {
+      "path": "models/ally/tribal.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Quaternius",
+      "intended_use": "character / NPC",
+      "bytes": 330208
+    },
+    {
+      "path": "models/ally/wizard.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Quaternius",
+      "intended_use": "character / NPC",
+      "bytes": 89464
+    },
+    {
+      "path": "models/chars/anya-proxy-wizard.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Quaternius (proxy)",
+      "intended_use": "Anya proxy (Quaternius Wizard)",
+      "manifest_id": "CHR-ANYA",
+      "bytes": 89464
+    },
+    {
+      "path": "models/chars/echo-proxy-ghost.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Quaternius (proxy)",
+      "intended_use": "Echo proxy (Ghost)",
+      "manifest_id": "CHR-ECHO",
+      "bytes": 203360
+    },
+    {
+      "path": "models/chars/patient-lucid-proxy-tribal.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Quaternius (proxy)",
+      "intended_use": "Lucid patient proxy",
+      "manifest_id": "CHR-PATIENT-LUCID",
+      "bytes": 330208
+    },
+    {
+      "path": "models/chars/stitcher-proxy-demon.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Quaternius (proxy)",
+      "intended_use": "Stitcher proxy (Demon)",
+      "manifest_id": "CHR-STITCHER",
+      "bytes": 321140
+    },
+    {
+      "path": "models/chars/warden-proxy-astronaut.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Quaternius (proxy)",
+      "intended_use": "Warden proxy (Astronaut)",
+      "manifest_id": "CHR-WARDEN",
+      "bytes": 701328
+    },
+    {
+      "path": "models/enemies/blue-demon.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Quaternius Ultimate Monsters",
+      "intended_use": "enemy creature",
+      "bytes": 439488
+    },
+    {
+      "path": "models/enemies/demon.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Quaternius Ultimate Monsters",
+      "intended_use": "enemy creature",
+      "bytes": 321140
+    },
+    {
+      "path": "models/enemies/enemy-flying.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Quaternius Ultimate Space Kit",
+      "intended_use": "enemy creature",
+      "bytes": 205104
+    },
+    {
+      "path": "models/enemies/enemy-large.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Quaternius Ultimate Space Kit",
+      "intended_use": "enemy creature",
+      "bytes": 439768
+    },
+    {
+      "path": "models/enemies/ghost-skull.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Quaternius Ultimate Monsters",
+      "intended_use": "enemy creature",
+      "bytes": 232384
+    },
+    {
+      "path": "models/enemies/ghost.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Quaternius Ultimate Monsters",
+      "intended_use": "enemy creature",
+      "bytes": 203360
+    },
+    {
+      "path": "models/environment/dungeon/License.txt",
+      "type": "license",
+      "license": "CC0",
+      "source": "Kenney Modular Dungeon Kit",
+      "intended_use": "environment kit piece",
+      "bytes": 708
+    },
+    {
+      "path": "models/environment/dungeon/colormap.png",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Kenney Modular Dungeon Kit",
+      "intended_use": "environment kit piece",
+      "bytes": 11816
+    },
+    {
+      "path": "models/environment/dungeon/corridor-corner.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Modular Dungeon Kit",
+      "intended_use": "Corner",
+      "manifest_id": "ENV-WARD-MOD",
+      "bytes": 72300
+    },
+    {
+      "path": "models/environment/dungeon/corridor-end.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Modular Dungeon Kit",
+      "intended_use": "environment kit piece",
+      "bytes": 101956
+    },
+    {
+      "path": "models/environment/dungeon/corridor-intersection.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Modular Dungeon Kit",
+      "intended_use": "environment kit piece",
+      "bytes": 35012
+    },
+    {
+      "path": "models/environment/dungeon/corridor-junction.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Modular Dungeon Kit",
+      "intended_use": "T-junction",
+      "manifest_id": "ENV-WARD-MOD",
+      "bytes": 51884
+    },
+    {
+      "path": "models/environment/dungeon/corridor-wide-corner.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Modular Dungeon Kit",
+      "intended_use": "environment kit piece",
+      "bytes": 140076
+    },
+    {
+      "path": "models/environment/dungeon/corridor-wide-end.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Modular Dungeon Kit",
+      "intended_use": "environment kit piece",
+      "bytes": 252924
+    },
+    {
+      "path": "models/environment/dungeon/corridor-wide.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Modular Dungeon Kit",
+      "intended_use": "environment kit piece",
+      "bytes": 169652
+    },
+    {
+      "path": "models/environment/dungeon/corridor.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Modular Dungeon Kit",
+      "intended_use": "Modular corridor segment",
+      "manifest_id": "ENV-WARD-MOD",
+      "bytes": 68592
+    },
+    {
+      "path": "models/environment/dungeon/gate-door-window.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Modular Dungeon Kit",
+      "intended_use": "environment kit piece",
+      "bytes": 95080
+    },
+    {
+      "path": "models/environment/dungeon/gate-door.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Modular Dungeon Kit",
+      "intended_use": "Door gate proxy",
+      "manifest_id": "ENV-DOOR-HOSP",
+      "bytes": 90640
+    },
+    {
+      "path": "models/environment/dungeon/gate-metal-bars.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Modular Dungeon Kit",
+      "intended_use": "environment kit piece",
+      "bytes": 68172
+    },
+    {
+      "path": "models/environment/dungeon/gate.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Modular Dungeon Kit",
+      "intended_use": "environment kit piece",
+      "bytes": 53804
+    },
+    {
+      "path": "models/environment/dungeon/room-corner.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Modular Dungeon Kit",
+      "intended_use": "environment kit piece",
+      "bytes": 379364
+    },
+    {
+      "path": "models/environment/dungeon/room-large.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Modular Dungeon Kit",
+      "intended_use": "environment kit piece",
+      "bytes": 821156
+    },
+    {
+      "path": "models/environment/dungeon/room-small.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Modular Dungeon Kit",
+      "intended_use": "Small room / bay shell",
+      "manifest_id": "ENV-ROOM-WARD",
+      "bytes": 379972
+    },
+    {
+      "path": "models/environment/dungeon/stairs.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Modular Dungeon Kit",
+      "intended_use": "Stair flight",
+      "manifest_id": "ENV-STAIR",
+      "bytes": 237304
+    },
+    {
+      "path": "models/environment/dungeon/template-floor-big.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Modular Dungeon Kit",
+      "intended_use": "environment kit piece",
+      "bytes": 49172
+    },
+    {
+      "path": "models/environment/dungeon/template-floor-layer-hole.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Modular Dungeon Kit",
+      "intended_use": "environment kit piece",
+      "bytes": 41092
+    },
+    {
+      "path": "models/environment/dungeon/template-floor.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Modular Dungeon Kit",
+      "intended_use": "Floor template",
+      "manifest_id": "ENV-WARD-MOD",
+      "bytes": 2024
+    },
+    {
+      "path": "models/environment/dungeon/template-wall-corner.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Modular Dungeon Kit",
+      "intended_use": "environment kit piece",
+      "bytes": 9688
+    },
+    {
+      "path": "models/environment/dungeon/template-wall-half.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Modular Dungeon Kit",
+      "intended_use": "environment kit piece",
+      "bytes": 18964
+    },
+    {
+      "path": "models/environment/dungeon/template-wall.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Modular Dungeon Kit",
+      "intended_use": "Wall template",
+      "manifest_id": "ENV-WARD-MOD",
+      "bytes": 34960
+    },
+    {
+      "path": "models/player/FPS_PLACEHOLDER.md",
+      "type": "doc",
+      "license": "unknown",
+      "source": "see ATTRIBUTION.md",
+      "intended_use": "player body / FPS placeholder",
+      "bytes": 373
+    },
+    {
+      "path": "models/player/astronaut.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Quaternius Ultimate Space Kit",
+      "intended_use": "Third-person body; FPS uses capsule \u2014 see FPS_PLACEHOLDER.md",
+      "manifest_id": "CHR-PLAYER-ARMS",
+      "bytes": 701328
+    },
+    {
+      "path": "models/player/kenney-animated/License.txt",
+      "type": "license",
+      "license": "CC0",
+      "source": "Kenney Animated Characters 1",
+      "intended_use": "player body / FPS placeholder",
+      "bytes": 688
+    },
+    {
+      "path": "models/player/kenney-animated/characterMedium.fbx",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Animated Characters 1",
+      "intended_use": "Kenney body + idle/run/jump FBX",
+      "manifest_id": "ANI-HUMAN-LOCOMOTION",
+      "bytes": 167212
+    },
+    {
+      "path": "models/player/kenney-animated/idle.fbx",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Animated Characters 1",
+      "intended_use": "player body / FPS placeholder",
+      "bytes": 608188
+    },
+    {
+      "path": "models/player/kenney-animated/jump.fbx",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Animated Characters 1",
+      "intended_use": "player body / FPS placeholder",
+      "bytes": 562796
+    },
+    {
+      "path": "models/player/kenney-animated/run.fbx",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Animated Characters 1",
+      "intended_use": "player body / FPS placeholder",
+      "bytes": 572732
+    },
+    {
+      "path": "models/player/kenney-animated/survivorFemaleA.png",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Kenney Animated Characters 1",
+      "intended_use": "player body / FPS placeholder",
+      "bytes": 54833
+    },
+    {
+      "path": "models/player/kenney-animated/survivorMaleB.png",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Kenney Animated Characters 1",
+      "intended_use": "player body / FPS placeholder",
+      "bytes": 52310
+    },
+    {
+      "path": "models/player/kenney-animated/zombieA.png",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Kenney Animated Characters 1",
+      "intended_use": "player body / FPS placeholder",
+      "bytes": 72088
+    },
+    {
+      "path": "models/player/kenney-animated/zombieC.png",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Kenney Animated Characters 1",
+      "intended_use": "player body / FPS placeholder",
+      "bytes": 54043
+    },
+    {
+      "path": "models/props/antenna.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Quaternius Ultimate Space Kit",
+      "intended_use": "Radio/antenna proxy",
+      "manifest_id": "PROP-RADIO",
+      "bytes": 29380
+    },
+    {
+      "path": "models/props/castle-colormap.png",
+      "type": "texture",
+      "license": "unknown",
+      "source": "see ATTRIBUTION.md",
+      "intended_use": "prop / set dressing",
+      "bytes": 7529
+    },
+    {
+      "path": "models/props/chest.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Quaternius Ultimate RPG Items",
+      "intended_use": "prop / set dressing",
+      "bytes": 95156
+    },
+    {
+      "path": "models/props/crate.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Quaternius Ultimate Space Kit",
+      "intended_use": "Throwable decoy proxy (crate)",
+      "manifest_id": "PROP-TRAY",
+      "bytes": 75296
+    },
+    {
+      "path": "models/props/debris-box-closed.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Furniture Kit",
+      "intended_use": "prop / set dressing",
+      "bytes": 5400
+    },
+    {
+      "path": "models/props/debris-box-open.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Furniture Kit",
+      "intended_use": "prop / set dressing",
+      "bytes": 5404
+    },
+    {
+      "path": "models/props/door.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Castle Kit",
+      "intended_use": "Swing door mesh",
+      "manifest_id": "ENV-DOOR-HOSP",
+      "bytes": 16968
+    },
+    {
+      "path": "models/props/emissive-light.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Quaternius Ultimate Space Kit",
+      "intended_use": "prop / set dressing",
+      "bytes": 41168
+    },
+    {
+      "path": "models/props/flashlight-adjacent-lamp.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Furniture Kit",
+      "intended_use": "Flashlight-adjacent lamp mesh",
+      "manifest_id": "PROP-FLASHLIGHT",
+      "bytes": 6604
+    },
+    {
+      "path": "models/props/furniture/bathroomCabinet.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Furniture Kit",
+      "intended_use": "prop / set dressing",
+      "bytes": 7216
+    },
+    {
+      "path": "models/props/furniture/bathroomMirror.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Furniture Kit",
+      "intended_use": "prop / set dressing",
+      "bytes": 6792
+    },
+    {
+      "path": "models/props/furniture/bathroomSink.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Furniture Kit",
+      "intended_use": "prop / set dressing",
+      "bytes": 22536
+    },
+    {
+      "path": "models/props/furniture/bathtub.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Furniture Kit",
+      "intended_use": "prop / set dressing",
+      "bytes": 35500
+    },
+    {
+      "path": "models/props/furniture/bedDouble.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Furniture Kit",
+      "intended_use": "prop / set dressing",
+      "bytes": 23368
+    },
+    {
+      "path": "models/props/furniture/bedSingle.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Furniture Kit",
+      "intended_use": "Patient bed",
+      "manifest_id": "ENV-ROOM-WARD",
+      "bytes": 18636
+    },
+    {
+      "path": "models/props/furniture/bookcaseClosedDoors.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Furniture Kit",
+      "intended_use": "Pharmacy shelves proxy",
+      "manifest_id": "ENV-PHARM",
+      "bytes": 22644
+    },
+    {
+      "path": "models/props/furniture/cabinetBedDrawer.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Furniture Kit",
+      "intended_use": "Hide cabinet",
+      "manifest_id": "ENV-HIDE",
+      "bytes": 16088
+    },
+    {
+      "path": "models/props/furniture/cardboardBoxClosed.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Furniture Kit",
+      "intended_use": "prop / set dressing",
+      "bytes": 5400
+    },
+    {
+      "path": "models/props/furniture/cardboardBoxOpen.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Furniture Kit",
+      "intended_use": "prop / set dressing",
+      "bytes": 5404
+    },
+    {
+      "path": "models/props/furniture/chair.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Furniture Kit",
+      "intended_use": "Day room chair",
+      "manifest_id": "ENV-ROOM-DAY",
+      "bytes": 10756
+    },
+    {
+      "path": "models/props/furniture/desk.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Furniture Kit",
+      "intended_use": "Nurses station desk",
+      "manifest_id": "ENV-ROOM-NURSE",
+      "bytes": 15048
+    },
+    {
+      "path": "models/props/furniture/doorway.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Furniture Kit",
+      "intended_use": "prop / set dressing",
+      "bytes": 14532
+    },
+    {
+      "path": "models/props/furniture/lampRoundFloor.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Furniture Kit",
+      "intended_use": "prop / set dressing",
+      "bytes": 6600
+    },
+    {
+      "path": "models/props/furniture/lampSquareFloor.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Furniture Kit",
+      "intended_use": "prop / set dressing",
+      "bytes": 5624
+    },
+    {
+      "path": "models/props/furniture/plantSmall1.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Furniture Kit",
+      "intended_use": "prop / set dressing",
+      "bytes": 8224
+    },
+    {
+      "path": "models/props/furniture/plantSmall2.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Furniture Kit",
+      "intended_use": "prop / set dressing",
+      "bytes": 12996
+    },
+    {
+      "path": "models/props/furniture/rugRectangle.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Furniture Kit",
+      "intended_use": "prop / set dressing",
+      "bytes": 3188
+    },
+    {
+      "path": "models/props/furniture/table.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Furniture Kit",
+      "intended_use": "Low table",
+      "manifest_id": "ENV-ROOM-DAY",
+      "bytes": 8196
+    },
+    {
+      "path": "models/props/furniture/trashcan.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Furniture Kit",
+      "intended_use": "prop / set dressing",
+      "bytes": 6452
+    },
+    {
+      "path": "models/props/furniture/wallDoorway.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Furniture Kit",
+      "intended_use": "prop / set dressing",
+      "bytes": 6444
+    },
+    {
+      "path": "models/props/kaykit/armchair.bin",
+      "type": "model-buffer",
+      "license": "CC0",
+      "source": "KayKit Furniture Bits",
+      "intended_use": "prop / set dressing",
+      "bytes": 17312
+    },
+    {
+      "path": "models/props/kaykit/armchair.gltf",
+      "type": "model",
+      "license": "CC0",
+      "source": "KayKit Furniture Bits",
+      "intended_use": "prop / set dressing",
+      "bytes": 3019
+    },
+    {
+      "path": "models/props/kaykit/armchair_pillows.bin",
+      "type": "model-buffer",
+      "license": "CC0",
+      "source": "KayKit Furniture Bits",
+      "intended_use": "prop / set dressing",
+      "bytes": 20420
+    },
+    {
+      "path": "models/props/kaykit/bed_single_B.bin",
+      "type": "model-buffer",
+      "license": "CC0",
+      "source": "KayKit Furniture Bits",
+      "intended_use": "prop / set dressing",
+      "bytes": 25348
+    },
+    {
+      "path": "models/props/kaykit/bed_single_B.gltf",
+      "type": "model",
+      "license": "CC0",
+      "source": "KayKit Furniture Bits",
+      "intended_use": "prop / set dressing",
+      "bytes": 3009
+    },
+    {
+      "path": "models/props/kaykit/cabinet_small.bin",
+      "type": "model-buffer",
+      "license": "CC0",
+      "source": "KayKit Furniture Bits",
+      "intended_use": "prop / set dressing",
+      "bytes": 19468
+    },
+    {
+      "path": "models/props/kaykit/cabinet_small.gltf",
+      "type": "model",
+      "license": "CC0",
+      "source": "KayKit Furniture Bits",
+      "intended_use": "prop / set dressing",
+      "bytes": 3001
+    },
+    {
+      "path": "models/props/kaykit/cabinet_small_decorated.bin",
+      "type": "model-buffer",
+      "license": "CC0",
+      "source": "KayKit Furniture Bits",
+      "intended_use": "prop / set dressing",
+      "bytes": 27552
+    },
+    {
+      "path": "models/props/kaykit/chair_A.bin",
+      "type": "model-buffer",
+      "license": "CC0",
+      "source": "KayKit Furniture Bits",
+      "intended_use": "prop / set dressing",
+      "bytes": 16504
+    },
+    {
+      "path": "models/props/kaykit/chair_A.gltf",
+      "type": "model",
+      "license": "CC0",
+      "source": "KayKit Furniture Bits",
+      "intended_use": "prop / set dressing",
+      "bytes": 3022
+    },
+    {
+      "path": "models/props/kaykit/chair_A_wood.bin",
+      "type": "model-buffer",
+      "license": "CC0",
+      "source": "KayKit Furniture Bits",
+      "intended_use": "prop / set dressing",
+      "bytes": 16504
+    },
+    {
+      "path": "models/props/kaykit/couch.bin",
+      "type": "model-buffer",
+      "license": "CC0",
+      "source": "KayKit Furniture Bits",
+      "intended_use": "prop / set dressing",
+      "bytes": 21416
+    },
+    {
+      "path": "models/props/kaykit/couch.gltf",
+      "type": "model",
+      "license": "CC0",
+      "source": "KayKit Furniture Bits",
+      "intended_use": "prop / set dressing",
+      "bytes": 3014
+    },
+    {
+      "path": "models/props/kaykit/couch_pillows.bin",
+      "type": "model-buffer",
+      "license": "CC0",
+      "source": "KayKit Furniture Bits",
+      "intended_use": "prop / set dressing",
+      "bytes": 27632
+    },
+    {
+      "path": "models/props/kaykit/furniturebits_texture.png",
+      "type": "texture",
+      "license": "CC0",
+      "source": "KayKit Furniture Bits",
+      "intended_use": "prop / set dressing",
+      "bytes": 15605
+    },
+    {
+      "path": "models/props/kaykit/shelf_A_small.bin",
+      "type": "model-buffer",
+      "license": "CC0",
+      "source": "KayKit Furniture Bits",
+      "intended_use": "prop / set dressing",
+      "bytes": 10104
+    },
+    {
+      "path": "models/props/kaykit/shelf_A_small.gltf",
+      "type": "model",
+      "license": "CC0",
+      "source": "KayKit Furniture Bits",
+      "intended_use": "prop / set dressing",
+      "bytes": 3033
+    },
+    {
+      "path": "models/props/kaykit/table_small.bin",
+      "type": "model-buffer",
+      "license": "CC0",
+      "source": "KayKit Furniture Bits",
+      "intended_use": "prop / set dressing",
+      "bytes": 9328
+    },
+    {
+      "path": "models/props/kaykit/table_small.gltf",
+      "type": "model",
+      "license": "CC0",
+      "source": "KayKit Furniture Bits",
+      "intended_use": "prop / set dressing",
+      "bytes": 2979
+    },
+    {
+      "path": "models/props/key-card.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Quaternius Ultimate RPG Items",
+      "intended_use": "ID / key card",
+      "manifest_id": "PROP-BADGE",
+      "bytes": 19236
+    },
+    {
+      "path": "models/props/key-ornate.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Quaternius Ultimate RPG Items",
+      "intended_use": "prop / set dressing",
+      "bytes": 41732
+    },
+    {
+      "path": "models/props/key.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Quaternius Ultimate RPG Items",
+      "intended_use": "Key mesh",
+      "manifest_id": "PROP-KEYFOB",
+      "bytes": 16980
+    },
+    {
+      "path": "models/props/metal-gate.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Castle Kit",
+      "intended_use": "prop / set dressing",
+      "bytes": 23240
+    },
+    {
+      "path": "models/props/padlock.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Quaternius Ultimate RPG Items",
+      "intended_use": "prop / set dressing",
+      "bytes": 33852
+    },
+    {
+      "path": "models/props/pickup-thunder.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Quaternius Ultimate Space Kit",
+      "intended_use": "prop / set dressing",
+      "bytes": 16120
+    },
+    {
+      "path": "models/props/rocks-large.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Castle Kit",
+      "intended_use": "prop / set dressing",
+      "bytes": 16204
+    },
+    {
+      "path": "models/props/rocks-small.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Castle Kit",
+      "intended_use": "prop / set dressing",
+      "bytes": 15192
+    },
+    {
+      "path": "models/props/skull.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Quaternius Ultimate RPG Items",
+      "intended_use": "Shelf clutter",
+      "manifest_id": "PROP-SHELF-DEBRIS",
+      "bytes": 20408
+    },
+    {
+      "path": "models/props/trashcan.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Furniture Kit",
+      "intended_use": "prop / set dressing",
+      "bytes": 6452
+    },
+    {
+      "path": "models/props/wall-lamp.glb",
+      "type": "model",
+      "license": "CC0",
+      "source": "Kenney Furniture Kit",
+      "intended_use": "Placeable lamp / lantern proxy",
+      "manifest_id": "PROP-LANTERN",
+      "bytes": 4828
+    },
+    {
+      "path": "textures/concrete/concrete_arm_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "PBR / material texture",
+      "bytes": 274177
+    },
+    {
+      "path": "textures/concrete/concrete_diff_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "Painted concrete (ceiling/floor)",
+      "manifest_id": "TEX-CEILING",
+      "bytes": 665654
+    },
+    {
+      "path": "textures/concrete/concrete_nor_gl_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "PBR / material texture",
+      "bytes": 855350
+    },
+    {
+      "path": "textures/concrete/concrete_rough_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "PBR / material texture",
+      "bytes": 478481
+    },
+    {
+      "path": "textures/concrete_floor/concrete_floor_arm_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "PBR / material texture",
+      "bytes": 614195
+    },
+    {
+      "path": "textures/concrete_floor/concrete_floor_diff_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "PBR / material texture",
+      "bytes": 927975
+    },
+    {
+      "path": "textures/concrete_floor/concrete_floor_nor_gl_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "PBR / material texture",
+      "bytes": 883889
+    },
+    {
+      "path": "textures/concrete_floor/concrete_floor_rough_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "PBR / material texture",
+      "bytes": 503981
+    },
+    {
+      "path": "textures/emissive/blood_stain_sparse.png",
+      "type": "texture",
+      "license": "MIT",
+      "source": "Openlearnia procedural",
+      "intended_use": "Sparse stain plate (restrained)",
+      "manifest_id": "TEX-BLOOD-SPARSE",
+      "bytes": 136
+    },
+    {
+      "path": "textures/emissive/exit_strip_emissive.png",
+      "type": "texture",
+      "license": "MIT",
+      "source": "Openlearnia procedural",
+      "intended_use": "Green exit strip",
+      "manifest_id": "TEX-EMISSIVE-EXIT",
+      "bytes": 131
+    },
+    {
+      "path": "textures/emissive/warning_strip_emissive.png",
+      "type": "texture",
+      "license": "MIT",
+      "source": "Openlearnia procedural",
+      "intended_use": "PBR / material texture",
+      "bytes": 131
+    },
+    {
+      "path": "textures/metal/metal_arm_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "PBR / material texture",
+      "bytes": 1004043
+    },
+    {
+      "path": "textures/metal/metal_diff_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "Dark metal plate",
+      "manifest_id": "TEX-METAL-RUST",
+      "bytes": 692234
+    },
+    {
+      "path": "textures/metal/metal_nor_gl_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "PBR / material texture",
+      "bytes": 770307
+    },
+    {
+      "path": "textures/metal/metal_rough_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "PBR / material texture",
+      "bytes": 775206
+    },
+    {
+      "path": "textures/peeling_painted_wall/peeling_painted_wall_arm_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "PBR / material texture",
+      "bytes": 783136
+    },
+    {
+      "path": "textures/peeling_painted_wall/peeling_painted_wall_diff_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "PBR / material texture",
+      "bytes": 440121
+    },
+    {
+      "path": "textures/peeling_painted_wall/peeling_painted_wall_nor_gl_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "PBR / material texture",
+      "bytes": 910482
+    },
+    {
+      "path": "textures/peeling_painted_wall/peeling_painted_wall_rough_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "PBR / material texture",
+      "bytes": 134529
+    },
+    {
+      "path": "textures/plaster/plaster_arm_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "PBR / material texture",
+      "bytes": 511105
+    },
+    {
+      "path": "textures/plaster/plaster_diff_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "Painted plaster wall",
+      "manifest_id": "TEX-WALL-TILE",
+      "bytes": 686726
+    },
+    {
+      "path": "textures/plaster/plaster_nor_gl_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "PBR / material texture",
+      "bytes": 900461
+    },
+    {
+      "path": "textures/plaster/plaster_rough_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "PBR / material texture",
+      "bytes": 354762
+    },
+    {
+      "path": "textures/rusty_metal/rusty_metal_arm_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "PBR / material texture",
+      "bytes": 153031
+    },
+    {
+      "path": "textures/rusty_metal/rusty_metal_diff_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "Rusty metal",
+      "manifest_id": "TEX-METAL-RUST",
+      "bytes": 564932
+    },
+    {
+      "path": "textures/rusty_metal/rusty_metal_nor_gl_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "PBR / material texture",
+      "bytes": 403156
+    },
+    {
+      "path": "textures/rusty_metal/rusty_metal_rough_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "PBR / material texture",
+      "bytes": 135023
+    },
+    {
+      "path": "textures/rusty_painted_metal/rusty_painted_metal_arm_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "PBR / material texture",
+      "bytes": 372615
+    },
+    {
+      "path": "textures/rusty_painted_metal/rusty_painted_metal_diff_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "PBR / material texture",
+      "bytes": 471866
+    },
+    {
+      "path": "textures/rusty_painted_metal/rusty_painted_metal_nor_gl_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "PBR / material texture",
+      "bytes": 484158
+    },
+    {
+      "path": "textures/rusty_painted_metal/rusty_painted_metal_rough_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "PBR / material texture",
+      "bytes": 318766
+    },
+    {
+      "path": "textures/tiles/tiles_arm_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "PBR / material texture",
+      "bytes": 164512
+    },
+    {
+      "path": "textures/tiles/tiles_diff_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "Blue floor tiles (hospital-adjacent)",
+      "manifest_id": "TEX-FLOOR-LINO",
+      "bytes": 583318
+    },
+    {
+      "path": "textures/tiles/tiles_nor_gl_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "PBR / material texture",
+      "bytes": 707926
+    },
+    {
+      "path": "textures/tiles/tiles_rough_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "PBR / material texture",
+      "bytes": 220483
+    },
+    {
+      "path": "textures/tiles_brown/tiles_brown_arm_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "PBR / material texture",
+      "bytes": 727331
+    },
+    {
+      "path": "textures/tiles_brown/tiles_brown_diff_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "PBR / material texture",
+      "bytes": 842317
+    },
+    {
+      "path": "textures/tiles_brown/tiles_brown_nor_gl_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "PBR / material texture",
+      "bytes": 410710
+    },
+    {
+      "path": "textures/tiles_brown/tiles_brown_rough_1k.jpg",
+      "type": "texture",
+      "license": "CC0",
+      "source": "Poly Haven",
+      "intended_use": "PBR / material texture",
+      "bytes": 658053
+    }
+  ]
+}

@@ -117,6 +117,9 @@ const jsonLd = {
       } else if (slug === 'ring-runner') {
         const { mountRingRunner } = await import('../../games/ring-runner/main');
         destroyGame = mountRingRunner(host);
+      } else if (slug === 'horror-ward') {
+        const { mountHorrorWard } = await import('../../games/horror-ward/main');
+        destroyGame = mountHorrorWard(host);
       }
     })();
   }

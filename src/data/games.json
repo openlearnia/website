@@ -18,5 +18,15 @@
     "controls": "Arrow keys / WASD or tilt stick · Space / tap to boost · F or Fullscreen button",
     "thumbnail": "/games/thumbs/ring-runner.svg",
     "status": "playable"
+  },
+  {
+    "slug": "horror-ward",
+    "name": "Horror Ward",
+    "tagline": "Ashford Ward 7 — Babylon.js stealth-horror pipeline smoke (flashlight, fog, modular dungeon).",
+    "framework": "Babylon.js",
+    "dimension": "3D",
+    "controls": "WASD move · mouse look · Shift sprint · F flashlight (pointer-locked) · fullscreen via shell button",
+    "thumbnail": "/games/thumbs/horror-ward.svg",
+    "status": "pipeline"
   }
 ]

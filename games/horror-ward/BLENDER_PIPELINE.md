@@ -74,13 +74,17 @@ Labels / kinds / quest `requires` still live in `wardMap.ts` `interacts[]`; empt
 
 Keep cool hospital palette — avoid Kenney stone colormap:
 
-- Floors: muted green-gray linoleum (~`#6b7a73`)
-- Walls: cool plaster white/green (~`#c7d6db`)
+- Floors: muted green-gray linoleum (~`#6b7a73`) + optional center stripe (`Prop_FloorStripe_*`)
+- Walls: cool plaster white/green (~`#c7d6db`) + baseboards / panels / frosted niches
+- Ceilings: **required** (`Ceil_*`) with slight emissive — hemi ground is near-black, so zero-emit ceilings read as void
+- Fixtures: recessed troffers (`Prop_Fixture_*_House/Diff/Edge`), not free-floating strips in open air
 - Trim / metal: dark teal-gray
 - UPS: dark clinical green with slight emission
-- Emergency strips: green emissive along corridor
+- Cove / emergency: green emissive along wall–ceiling seam
 
-Horror mood still comes from Three.js `FogExp2` + flashlight (`lighting.ts`).
+Horror mood still comes from Three.js `FogExp2` + flashlight (`lighting.ts`). Dress script: `blender/dress_ward7_hospital.py`.
+
+Audit screenshots: scroll `#game-shell` into view (and prefer fullscreen) before capturing — never crop the marketing header over half the canvas.
 
 ## Export (Blender MCP)
 

@@ -108,11 +108,12 @@ export async function loadBlenderWard(): Promise<BlenderWardParsed> {
       o.visible = false;
       return;
     }
-    // Clinical mesh shadows
+    // Clinical mesh shadows + keep underside ceilings readable under hemi-ground (near-black).
     const mesh = o as THREE.Mesh;
     if (mesh.isMesh) {
       mesh.castShadow = true;
       mesh.receiveShadow = true;
+      clinicalCeilingMaterials(mesh);
     }
   });
 
@@ -147,6 +148,35 @@ export function applySpawnPositions(
     if (!p) return s;
     return { ...s, x: p.x, z: p.z };
   });
+}
+
+/**
+ * Horror HemisphereLight ground is ~black, so ceiling undersides vanish without emission.
+ * Enclosure you can't see isn't enclosure — keep Ceil_* readable against fog/clear.
+ */
+function clinicalCeilingMaterials(mesh: THREE.Mesh) {
+  const n = mesh.name;
+  const isCeil = n.startsWith('Ceil_') || n.startsWith('Prop_CeilGroove');
+  const isFixture = n.includes('Fixture') && (n.includes('Diff') || n.includes('Edge'));
+  const isCove = n.startsWith('Prop_Cove_');
+  if (!isCeil && !isFixture && !isCove) return;
+  const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+  for (const mat of mats) {
+    const std = mat as THREE.MeshStandardMaterial;
+    if (!std?.isMeshStandardMaterial) continue;
+    std.side = THREE.DoubleSide;
+    if (isCeil) {
+      // Force a cool clinical wash; glTF often bakes weak emit into a dark color @ intensity 1.
+      std.color = new THREE.Color(0xd8e2dc);
+      std.emissive = new THREE.Color(0xa8bdb0);
+      std.emissiveIntensity = 0.55;
+      std.roughness = 0.92;
+      std.metalness = 0;
+    } else if (isFixture || isCove) {
+      std.emissive = new THREE.Color(0x6ee0a0);
+      std.emissiveIntensity = Math.max(std.emissiveIntensity ?? 0, 0.85);
+    }
+  }
 }
 
 /** Point-in-solid test using Blender AABBs only (no Kenney walk channel). */

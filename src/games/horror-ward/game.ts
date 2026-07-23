@@ -797,6 +797,16 @@ export async function mountHorrorGame(
     if (params.get('safe') === '1') {
       for (const e of enemies) e.setActive(false);
     }
+    // Pitch for enclosure audits (YXZ). Positive pitch looks up at ceilings; negative looks down.
+    const pitchParam = params.get('pitch');
+    if (pitchParam != null && player) {
+      const pitch = Number(pitchParam);
+      if (Number.isFinite(pitch)) {
+        const yaw = camera.rotation.y;
+        camera.rotation.order = 'YXZ';
+        camera.rotation.set(THREE.MathUtils.clamp(pitch, -1.2, 1.2), yaw, 0);
+      }
+    }
 
     return () => {
       window.removeEventListener('keydown', onHoldDown);

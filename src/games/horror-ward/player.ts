@@ -255,6 +255,7 @@ export function createFpsPlayer(
       body.position.set(p.x, 0.85, p.z);
       // Default camera looks −Z; yaw 0 keeps that. π faces +Z down the ward spine.
       if (yawRad != null) {
+        camera.rotation.order = 'YXZ';
         camera.rotation.set(0, yawRad, 0);
         camera.quaternion.setFromEuler(camera.rotation);
       }

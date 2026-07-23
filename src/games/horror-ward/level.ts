@@ -409,6 +409,13 @@ export async function buildWardLevel(
       const blender = await loadBlenderWard();
       root.add(blender.root);
 
+      // Clinical fog: pure black exp fog turns distant ceilings into "void" even when meshed.
+      if (scene.fog instanceof THREE.FogExp2) {
+        scene.fog.color.set(0x121a18);
+        scene.fog.density = Math.min(scene.fog.density, 0.022);
+      }
+      scene.background = new THREE.Color(0x0c1412);
+
       // Room lights from authored map (same meters as Blender empties)
       for (const phase of phaseOrder()) {
         for (const l of lightsInPhase(map, phase)) {

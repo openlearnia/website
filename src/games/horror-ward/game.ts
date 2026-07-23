@@ -165,11 +165,12 @@ export async function mountHorrorGame(
   };
 
   const openBayB = () => {
-    const gate = level?.interactables.find((i) => i.id === 'bay_b_gate');
-    if (gate) {
-      gate.enabled = false;
-      gate.consumed = true;
-      gate.mesh.visible = false;
+    level?.setBlocker('bay_b_gate', false);
+    for (const it of level?.interactables ?? []) {
+      if (it.requires === 'upsRestored' || it.requires === 'bayBOpen') {
+        it.enabled = true;
+        it.mesh.visible = true;
+      }
     }
     state.flags.bayBOpen = true;
     state.beat = 'bay_b';
@@ -209,6 +210,10 @@ export async function mountHorrorGame(
         break;
       }
       case 'badge': {
+        if (!state.flags.upsRestored) {
+          radio('Anya: Power the UPS before we dig through Bay B.');
+          return;
+        }
         if (it.consumed) return;
         it.consumed = true;
         it.mesh.visible = false;
@@ -222,6 +227,10 @@ export async function mountHorrorGame(
         break;
       }
       case 'doc': {
+        if (!state.flags.upsRestored) {
+          radio('Bay B is sealed — restore the UPS first.');
+          return;
+        }
         if (it.consumed) return;
         it.consumed = true;
         state.docs.push('DOC-01');
@@ -234,6 +243,10 @@ export async function mountHorrorGame(
         break;
       }
       case 'lantern_socket': {
+        if (!state.flags.upsRestored) {
+          radio('Anya: UPS first. Then pharmacy light.');
+          return;
+        }
         if (state.flags.lanternPlaced) return;
         state.flags.lanternPlaced = true;
         it.consumed = true;
@@ -245,6 +258,7 @@ export async function mountHorrorGame(
         break;
       }
       case 'lucid': {
+        if (!state.flags.upsRestored) return;
         if (state.flags.lucidSaved) return;
         state.flags.lucidSaved = true;
         it.consumed = true;
@@ -264,6 +278,7 @@ export async function mountHorrorGame(
             radio('Anya: Badges and a lit pharmacy path first.');
             return;
           }
+          level?.setBlocker('stair_gate', false);
           it.consumed = true;
           it.mesh.visible = false;
           state.act = 3;
@@ -418,6 +433,18 @@ export async function mountHorrorGame(
         fog: scene.fog instanceof THREE.FogExp2 ? scene.fog.density : null,
         light: level!.lighting.isGlobalLighting(),
         battery: player?.getBattery() ?? null,
+        flags: { ...state.flags },
+        objective: state.objective,
+        walls: level!.walls.length,
+        blockers: [...level!.blockers.keys()],
+        canStandCenter: level!.canStand(0, 4),
+        canStandWall: level!.canStand(1.6, 4),
+        canStandGate: level!.canStand(0, 14),
+        canStandUps: level!.canStand(6.4, 12),
+        badgeEnabled: level!.interactables.filter((i) => i.kind === 'badge').map((i) => ({
+          id: i.id,
+          enabled: i.enabled,
+        })),
       };
     };
 
@@ -576,8 +603,24 @@ export async function mountHorrorGame(
       }
       if (!state.playing || state.paused || dialogueLock) return;
 
-      player.update(dt, level.canStand);
+      player.update(dt, (x, z) => level!.canStand(x, z), (x, z) => level!.resolveMove(x, z));
       const sense = player.sense();
+      // Short look-ahead back-off so near clip doesn't poke through wall faces
+      {
+        const look = new THREE.Vector3();
+        player.camera.getWorldDirection(look);
+        look.y = 0;
+        look.normalize();
+        const probeX = sense.position.x + look.x * 0.28;
+        const probeZ = sense.position.z + look.z * 0.28;
+        if (!level.canStand(probeX, probeZ)) {
+          const back = level.resolveMove(sense.position.x - look.x * 0.12, sense.position.z - look.z * 0.12);
+          player.camera.position.x = back.x;
+          player.camera.position.z = back.z;
+          player.body.position.x = back.x;
+          player.body.position.z = back.z;
+        }
+      }
       state.resources.battery = player.getBattery();
       state.resources.stamina = player.getStamina();
       hud.setBattery(state.resources.battery);
@@ -698,15 +741,52 @@ export async function mountHorrorGame(
       const spots: Record<string, THREE.Vector3> = {
         lobby: level.zones.lobby,
         nurses: level.zones.nurses,
+        ups: level.zones.ups,
         dayroom: level.zones.dayroom,
         sub: level.zones.sub,
         theater: level.zones.theater,
+        gate: new THREE.Vector3(0, 0.85, 12.5),
       };
       const spot = spots[at];
       if (spot) {
         // Face +Z down the authored spine (walls left/right, open path center).
-        player.teleport(new THREE.Vector3(spot.x, 0.85, spot.z), Math.PI);
+        let yaw = Math.PI;
+        const look = params.get('look');
+        if (look === 'east' || look === 'e') yaw = -Math.PI / 2;
+        else if (look === 'west' || look === 'w') yaw = Math.PI / 2;
+        else if (look === 'south' || look === 's') yaw = 0;
+        else if (look === 'north' || look === 'n') yaw = Math.PI;
+        player.teleport(new THREE.Vector3(spot.x, 0.85, spot.z), yaw);
       }
+    }
+    // Movement collision smoke-test: ?probe=walk
+    if (params.get('probe') === 'walk' && level && player) {
+      const ox = player.camera.position.x;
+      const oz = player.camera.position.z;
+      // Try shove into east wall from lobby
+      player.teleport(new THREE.Vector3(0, 0.85, 4), -Math.PI / 2);
+      for (let i = 0; i < 40; i++) {
+        player.update(0.05, (x, z) => level!.canStand(x, z), (x, z) => level!.resolveMove(x, z));
+        // Hold D artificially — inject via keys is hard; shove camera wish by teleport attempts
+        const wishX = player.camera.position.x + 0.15;
+        if (level.canStand(wishX, player.camera.position.z)) player.camera.position.x = wishX;
+      }
+      const wallBlockedX = player.camera.position.x;
+      // Try shove through Bay B gate
+      player.teleport(new THREE.Vector3(0, 0.85, 12.5), Math.PI);
+      for (let i = 0; i < 40; i++) {
+        const wishZ = player.camera.position.z + 0.2;
+        if (level.canStand(player.camera.position.x, wishZ)) player.camera.position.z = wishZ;
+        else break;
+      }
+      const gateBlockedZ = player.camera.position.z;
+      (window as unknown as { __horrorWalkProbe?: unknown }).__horrorWalkProbe = {
+        wallBlockedX,
+        gateBlockedZ,
+        gatePass: gateBlockedZ > 14.2,
+        wallClip: wallBlockedX > 1.35,
+      };
+      player.teleport(new THREE.Vector3(ox, 0.85, oz), Math.PI);
     }
     if (params.get('light') === '1') {
       level.lighting.setGlobalLighting(true);

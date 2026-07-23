@@ -17,7 +17,11 @@ Raycast-verified openings:
 
 Spine tiles (`gx === 0`, non-room) must use NS-open rotations. EW spurs use rot 0 / end 0|180. Wrong rot lays wall slabs **across** the walk path.
 
-`WALK_RADIUS = 1.25` keeps the capsule inside wall faces (~1.4 from cell center).
+`WALK_RADIUS = 1.25` keeps the capsule inside wall faces (~1.4 from cell center). **Also:** `buildWallColliders()` emits AABB slabs on closed Kenney edges (`WALL_INSET = 1.32`, `PLAYER_RADIUS = 0.32`). Locked `blocks: true` interacts (Bay B gate, stair) add temporary blockers cleared on unlock.
+
+## Hospital skin (stuck with dungeon kit)
+
+Kenney Modular Dungeon meshes stay for structure (no hospital modular pack yet). `clinicalSkin()` in `level.ts` recolors floors → linoleum grey-green and walls → cool plaster; corridor strips use `cool` fluorescent lights; `WARD_SIGNS` labels lobby / nurses / utility UPS / Bay B / day room / pharmacy / stairwell. Props prefer beds, desks, cabinets, sinks, plants over crates/skulls.
 
 ## Skills applied
 
@@ -38,7 +42,7 @@ Spine tiles (`gx === 0`, non-room) must use NS-open rotations. EW spurs use rot 
 
 ## Walkable grid
 
-`buildWalkable()` expands each tile into `"gx,gz"` cells. `canStand` rejects positions outside `WALK_RADIUS` of a walkable cell center so you cannot clip through corridor walls.
+`buildWalkable()` expands each tile into `"gx,gz"` cells. `canStand` requires a walk channel **and** no wall/blocker AABB hit so you cannot clip through corridor walls or locked gates.
 
 ## No scatter
 

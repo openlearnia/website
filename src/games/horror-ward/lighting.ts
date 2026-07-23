@@ -2,10 +2,10 @@ import * as THREE from 'three';
 
 export const GLOBAL_LIGHT_STORAGE_KEY = 'horror-ward-global-light';
 
-/** Horror defaults — flashlight does the heavy lifting. */
+/** Horror defaults — flashlight does the heavy lifting. Cool clinical ambient. */
 const HORROR = {
-  hemi: 0.22,
-  ambient: 0.12,
+  hemi: 0.2,
+  ambient: 0.1,
   fill: 0,
   fogMul: 1,
   roomMul: 1,
@@ -13,14 +13,14 @@ const HORROR = {
 
 /**
  * Tasteful debug/casual fill — readable geometry without washing to white.
- * Opponent note: stadium floodlights would kill dread; this stays green-ward tinted.
+ * Opponent note: stadium floodlights would kill dread; this stays clinical cool.
  */
 const GLOBAL = {
-  hemi: 1.35,
-  ambient: 1.1,
-  fill: 0.85,
+  hemi: 1.25,
+  ambient: 1.05,
+  fill: 0.8,
   fogMul: 0.22,
-  roomMul: 2.4,
+  roomMul: 2.35,
 } as const;
 
 export type FlashlightHandle = {
@@ -64,21 +64,21 @@ export function saveGlobalLightPref(on: boolean): void {
 }
 
 export function applyHorrorLighting(scene: THREE.Scene): HorrorLighting {
-  const hemi = new THREE.HemisphereLight(0x5a7a70, 0x050805, HORROR.hemi);
+  const hemi = new THREE.HemisphereLight(0x6a8898, 0x080a0c, HORROR.hemi);
   scene.add(hemi);
 
-  const ambient = new THREE.AmbientLight(0x2a3a32, HORROR.ambient);
+  const ambient = new THREE.AmbientLight(0x243038, HORROR.ambient);
   scene.add(ambient);
 
   // Soft key fill for global mode only (intensity 0 while horror).
-  const fill = new THREE.DirectionalLight(0xc5dcc8, HORROR.fill);
+  const fill = new THREE.DirectionalLight(0xc5d8e0, HORROR.fill);
   fill.position.set(6, 14, 8);
   fill.target.position.set(0, 0, 24);
   scene.add(fill);
   scene.add(fill.target);
 
   // Second fill from opposite side so corridors aren't one-sided silhouettes.
-  const fill2 = new THREE.DirectionalLight(0x8aab9a, 0);
+  const fill2 = new THREE.DirectionalLight(0x8aa8b8, 0);
   fill2.position.set(-8, 10, -4);
   fill2.target.position.set(0, 0, 40);
   scene.add(fill2);
@@ -187,7 +187,7 @@ export function createFlashlight(): FlashlightHandle {
 const KIND_COLOR: Record<string, number> = {
   warm: 0xe6c089,
   green: 0x6e9b7a,
-  cool: 0x7a9bb0,
+  cool: 0x9bb8c8,
 };
 
 export function makeRoomLight(spec: {

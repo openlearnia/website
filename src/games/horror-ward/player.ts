@@ -30,7 +30,11 @@ export type PlayerController = {
   struggleTap: () => void;
   consumeStruggle: () => number;
   teleport: (pos: THREE.Vector3, yawRad?: number) => void;
-  update: (dt: number, canStand: (x: number, z: number) => boolean) => void;
+  update: (
+    dt: number,
+    canStand: (x: number, z: number) => boolean,
+    resolveMove?: (x: number, z: number) => { x: number; z: number },
+  ) => void;
   dispose: () => void;
 };
 
@@ -118,7 +122,11 @@ export function createFpsPlayer(
   const wish = new THREE.Vector3();
   const pos = new THREE.Vector3();
 
-  const update = (dt: number, canStand: (x: number, z: number) => boolean) => {
+  const update = (
+    dt: number,
+    canStand: (x: number, z: number) => boolean,
+    resolveMove?: (x: number, z: number) => { x: number; z: number },
+  ) => {
     if (!enabled) return;
 
     const sprinting = keys['ShiftLeft'] || keys['ShiftRight'];
@@ -144,10 +152,22 @@ export function createFpsPlayer(
     if (keys['KeyA'] || keys['ArrowLeft']) wish.sub(right);
     if (wish.lengthSq() > 0) {
       wish.normalize().multiplyScalar(speed * dt);
-      const nx = camera.position.x + wish.x;
-      const nz = camera.position.z + wish.z;
-      if (canStand(nx, camera.position.z)) camera.position.x = nx;
-      if (canStand(camera.position.x, nz)) camera.position.z = nz;
+      const ox = camera.position.x;
+      const oz = camera.position.z;
+      let nx = ox + wish.x;
+      let nz = oz + wish.z;
+      // Separating-axis slide against walk + AABB walls
+      if (canStand(nx, oz)) camera.position.x = nx;
+      else if (resolveMove) {
+        const r = resolveMove(nx, oz);
+        if (canStand(r.x, oz)) camera.position.x = r.x;
+      }
+      nx = camera.position.x;
+      if (canStand(nx, nz)) camera.position.z = nz;
+      else if (resolveMove) {
+        const r = resolveMove(nx, nz);
+        if (canStand(nx, r.z)) camera.position.z = r.z;
+      }
 
       footAcc += speed * dt;
       if (footAcc > (crouched ? 1.4 : 1.0)) {

@@ -24,7 +24,7 @@
   {
     "slug": "horror-ward",
     "name": "Horror Ward",
-    "tagline": "Ashford Ward 7 — Three.js stealth-horror on an authored Kenney grid.",
+    "tagline": "Ashford Ward 7 — Three.js stealth-horror on a Blender-authored hospital map.",
     "framework": "Three.js",
     "dimension": "3D",
     "controls": "WASD · mouse · Shift sprint · Ctrl crouch · F light · E interact · LMB stun · Esc pause · shell fullscreen",

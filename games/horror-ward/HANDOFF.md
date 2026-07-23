@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-23  
 **Audience:** Blender MCP sibling agent + whoever wires the GLB into Three.js  
-**Status:** Gameplay/collision/quest gating shipped on Kenney grid. **Do not extend Kenney visual identity** — custom hospital GLB replaces dungeon look.
+**Status:** Gameplay/collision/quest gating shipped. **Primary map:** Blender `assets/maps/ward7.glb` (`BLENDER_PIPELINE.md`). Kenney dungeon is fallback only.
 
 ---
 

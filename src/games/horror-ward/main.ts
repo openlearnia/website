@@ -2,7 +2,7 @@ import { createHorrorEngine } from './engine';
 import { mountHorrorGame } from './game';
 
 /**
- * Mount Horror Ward (Three.js + authored Kenney grid) into a host element.
+ * Mount Horror Ward (Three.js + Blender ward7.glb, Kenney fallback) into a host element.
  * Returns dispose().
  */
 export function mountHorrorWard(host: HTMLElement): () => void {

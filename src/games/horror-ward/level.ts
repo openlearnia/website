@@ -2,6 +2,12 @@ import * as THREE from 'three';
 import { loadModel } from './assets';
 import { applyHorrorLighting, makeRoomLight, type HorrorLighting } from './lighting';
 import {
+  loadBlenderWard,
+  applyInteractPositions,
+  canStandBlender,
+  WARD7_GLB,
+} from './blenderWard';
+import {
   WARD7_MAP,
   TILE_FILE,
   PROP_FILE,
@@ -61,6 +67,8 @@ export type WardLevel = {
   blockers: Map<string, Aabb2>;
   hideNodes: THREE.Vector3[];
   root: THREE.Group;
+  /** True when Blender ward7.glb is the visual + collision source. */
+  blenderMap: boolean;
   setFogAct: (act: number) => void;
   setBlocker: (id: string, active: boolean) => void;
   nearestInteractable: (pos: THREE.Vector3, maxDist?: number) => Interactable | null;
@@ -78,7 +86,7 @@ export type LevelProgress = {
 
 const DUNGEON_ROOT = 'models/environment/dungeon';
 
-/** Cool clinical wash over Kenney dungeon colormap (stuck with kit; skinned hospital). */
+/** Cool clinical wash over Kenney dungeon colormap (fallback path only). */
 function clinicalSkin(root: THREE.Object3D) {
   const plaster = new THREE.Color(0xd4dde2);
   const linoleum = new THREE.Color(0x7a8884);
@@ -91,14 +99,12 @@ function clinicalSkin(root: THREE.Object3D) {
     if (!bb) return;
     const size = new THREE.Vector3();
     bb.getSize(size);
-    // Clone mats — GLTF cache shares materials across clones
     if (Array.isArray(mesh.material)) mesh.material = mesh.material.map((m) => m.clone());
     else if (mesh.material) mesh.material = mesh.material.clone();
     const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
     for (const mat of mats) {
       const std = mat as THREE.MeshStandardMaterial;
       if (!std?.color) continue;
-      // Drop dungeon colormap — retint to clinical solid (kit geometry stays)
       if (std.map) {
         std.map = null;
         std.needsUpdate = true;
@@ -192,16 +198,202 @@ function blockerFromSpec(spec: InteractSpec): Aabb2 {
   };
 }
 
+function finishLevel(args: {
+  scene: THREE.Scene;
+  map: WardMap;
+  lighting: HorrorLighting;
+  root: THREE.Group;
+  walls: Aabb2[];
+  blockers: Map<string, Aabb2>;
+  walkable: Set<string>;
+  interactSpecs: InteractSpec[];
+  checkpoints: Record<string, THREE.Vector3>;
+  spawns: Record<string, THREE.Vector3>;
+  blenderMap: boolean;
+}): WardLevel {
+  const {
+    scene,
+    map,
+    lighting,
+    root,
+    walls,
+    blockers,
+    walkable,
+    interactSpecs,
+    checkpoints,
+    spawns,
+    blenderMap,
+  } = args;
+
+  const interactables: Interactable[] = [];
+  for (const sign of WARD_SIGNS) {
+    root.add(makeSign(sign.text, sign.x, sign.z, sign.rot ?? 0));
+  }
+
+  for (const spec of interactSpecs) {
+    const mesh = makeInteractMesh(spec);
+    root.add(mesh);
+    const gated = Boolean(spec.requires);
+    interactables.push({
+      id: spec.id,
+      kind: spec.kind as InteractKind,
+      mesh,
+      label: spec.label,
+      enabled: !gated,
+      once: true,
+      data: spec.gate ? { locked: true } : undefined,
+      requires: spec.requires,
+    });
+    if (gated) mesh.visible = false;
+    // Blender path: gate AABBs already in blockers from Col_*; Kenney uses blocks flag
+    if (!blenderMap && spec.blocks) {
+      blockers.set(spec.id, blockerFromSpec(spec));
+    } else if (blenderMap && spec.blocks && !blockers.has(spec.id)) {
+      blockers.set(spec.id, blockerFromSpec(spec));
+    }
+  }
+
+  const zones: Record<string, THREE.Vector3> = {
+    lobby: new THREE.Vector3(0, 0, 4),
+    nurses: new THREE.Vector3(-8, 0, 12),
+    ups: new THREE.Vector3(6.4, 0, 12),
+    dayroom: new THREE.Vector3(8, 0, 36),
+    pharmacy: new THREE.Vector3(8, 0, 44),
+    lucid: new THREE.Vector3(-7.5, 0, 44),
+    sub: new THREE.Vector3(0, 0, 66),
+    theater: new THREE.Vector3(0, 0, 88),
+    tunnel: new THREE.Vector3(0, 0, 100),
+  };
+
+  const hideNodes = [
+    new THREE.Vector3(-1.6, 0, 5),
+    new THREE.Vector3(-9.5, 0, 13.5),
+    new THREE.Vector3(-7.5, 0, 29),
+    new THREE.Vector3(9.5, 0, 37.5),
+    new THREE.Vector3(-1.6, 0, 67),
+  ];
+
+  const activeBlockers = (): Aabb2[] => [...blockers.values()];
+
+  const inWalkChannel = (x: number, z: number) => {
+    const gx = Math.round(x / CELL);
+    const gz = Math.round(z / CELL);
+    const tryCell = (cx: number, cz: number, radius: number) => {
+      if (!walkable.has(`${cx},${cz}`)) return false;
+      return Math.hypot(x - cx * CELL, z - cz * CELL) <= radius;
+    };
+    if (tryCell(gx, gz, WALK_RADIUS + 0.15)) return true;
+    for (const [ox, oz] of [
+      [1, 0],
+      [-1, 0],
+      [0, 1],
+      [0, -1],
+    ] as const) {
+      const key = `${gx + ox},${gz + oz}`;
+      if (!walkable.has(key)) continue;
+      const wide =
+        walkable.has(`${gx + ox + 1},${gz + oz}`) || walkable.has(`${gx + ox},${gz + oz + 1}`);
+      if (tryCell(gx + ox, gz + oz, wide ? CELL * 1.2 : WALK_RADIUS + 0.15)) return true;
+    }
+    return false;
+  };
+
+  const solidHit = (x: number, z: number) =>
+    hitsAnyAabb(x, z, walls, PLAYER_RADIUS) || hitsAnyAabb(x, z, activeBlockers(), PLAYER_RADIUS);
+
+  const canStand = (x: number, z: number) => {
+    if (blenderMap) return canStandBlender(x, z, walls, activeBlockers());
+    if (!inWalkChannel(x, z)) return false;
+    if (solidHit(x, z)) return false;
+    return true;
+  };
+
+  const resolveMove = (x: number, z: number) => {
+    if (canStand(x, z)) return { x, z };
+    const solids = [...walls, ...activeBlockers()];
+    const pushed = resolveAabbOverlap(x, z, solids, PLAYER_RADIUS);
+    if (canStand(pushed.x, pushed.z)) return pushed;
+    return { x, z };
+  };
+
+  return {
+    map,
+    lighting,
+    interactables,
+    checkpoints,
+    spawns,
+    zones,
+    walkable,
+    walls,
+    blockers,
+    hideNodes,
+    root,
+    blenderMap,
+    setFogAct: (act) => lighting.setFogAct(act),
+    setBlocker: (id, active) => {
+      const it = interactables.find((i) => i.id === id);
+      if (!active) {
+        blockers.delete(id);
+        if (it) {
+          it.enabled = false;
+          it.consumed = true;
+          it.mesh.visible = false;
+          if (it.data) it.data.locked = false;
+        }
+        // Hide matching visual door if present
+        root.traverse((o) => {
+          if (id === 'bay_b_gate' && o.name === 'Door_BayB_Gate') o.visible = false;
+          if (id === 'stair_gate' && o.name === 'Door_Stair') o.visible = false;
+        });
+      } else if (it) {
+        const spec = interactSpecs.find((s) => s.id === id);
+        if (spec?.blocks) blockers.set(id, blockerFromSpec(spec));
+      }
+    },
+    nearestInteractable: (pos, maxDist = 2.2) => {
+      let best: Interactable | null = null;
+      let bestD = maxDist;
+      for (const it of interactables) {
+        if (!it.enabled || it.consumed) continue;
+        const reach = it.kind === 'ups' ? Math.max(maxDist, 2.8) : maxDist;
+        const d = pos.distanceTo(it.mesh.position);
+        if (d < bestD && d <= reach) {
+          bestD = d;
+          best = it;
+        }
+      }
+      return best;
+    },
+    canStand,
+    resolveMove,
+    dispose: () => {
+      lighting.dispose();
+      scene.remove(root);
+      root.traverse((o) => {
+        const m = o as THREE.Mesh;
+        if (m.isMesh) {
+          m.geometry?.dispose();
+          const mat = m.material;
+          if (Array.isArray(mat)) mat.forEach((x) => x.dispose());
+          else mat?.dispose();
+        }
+      });
+    },
+  };
+}
+
 /**
- * Build Ward 7 from authored map. Fast Play: await lobby phase, stream the rest.
+ * Build Ward 7 — Blender ward7.glb primary; Kenney modular dungeon fallback only.
  */
 export async function buildWardLevel(
   scene: THREE.Scene,
   options: {
     map?: WardMap;
     onProgress?: (p: LevelProgress) => void;
-    /** If true, resolves after lobby tiles; continues loading in background. */
+    /** If true (Kenney fallback), resolves after lobby tiles; continues loading in background. */
     fastPlay?: boolean;
+    /** Force Kenney path (debug). */
+    forceKenney?: boolean;
   } = {},
 ): Promise<WardLevel> {
   const map = options.map ?? WARD7_MAP;
@@ -210,12 +402,57 @@ export async function buildWardLevel(
   root.name = 'ward7';
   scene.add(root);
 
-  const interactables: Interactable[] = [];
+  options.onProgress?.({ phase: 'lobby', done: 0, total: 1, label: `Loading ${WARD7_GLB}…` });
+
+  if (!options.forceKenney) {
+    try {
+      const blender = await loadBlenderWard();
+      root.add(blender.root);
+
+      // Room lights from authored map (same meters as Blender empties)
+      for (const phase of phaseOrder()) {
+        for (const l of lightsInPhase(map, phase)) {
+          const pl = makeRoomLight(l);
+          root.add(pl);
+          lighting.addRoomLight(pl);
+        }
+      }
+
+      const interactSpecs = applyInteractPositions(map.interacts, blender.interactPositions);
+      const checkpoints = { ...blender.checkpoints };
+      for (const c of map.checkpoints) {
+        if (!checkpoints[c.id]) checkpoints[c.id] = new THREE.Vector3(c.x, 0.85, c.z);
+      }
+      const spawns = { ...blender.spawns };
+      for (const s of map.spawns) {
+        if (!spawns[s.id]) spawns[s.id] = new THREE.Vector3(s.x, 0.85, s.z);
+      }
+
+      options.onProgress?.({ phase: 'ready', done: 1, total: 1, label: 'Ward 7 (Blender) ready' });
+
+      return finishLevel({
+        scene,
+        map,
+        lighting,
+        root,
+        walls: blender.walls,
+        blockers: blender.blockers,
+        walkable: buildWalkable(map),
+        interactSpecs,
+        checkpoints,
+        spawns,
+        blenderMap: true,
+      });
+    } catch (err) {
+      console.warn('[horror-ward] Blender map failed → Kenney fallback', err);
+    }
+  }
+
+  // —— Kenney fallback (modular dungeon kit) ——
   const walkable = buildWalkable(map);
   const walls = buildWallColliders(map);
   const blockers = new Map<string, Aabb2>();
 
-  // Invisible ground pad for feet + visible linoleum wash over dungeon floors
   const floor = new THREE.Mesh(
     new THREE.PlaneGeometry(80, 140),
     new THREE.MeshStandardMaterial({ color: 0x0a100e, visible: false }),
@@ -224,21 +461,6 @@ export async function buildWardLevel(
   floor.position.set(0, 0, 50);
   floor.receiveShadow = true;
   root.add(floor);
-
-  const lino = new THREE.Mesh(
-    new THREE.PlaneGeometry(28, 110),
-    new THREE.MeshStandardMaterial({
-      color: 0x6e7a76,
-      roughness: 0.9,
-      metalness: 0.02,
-      transparent: true,
-      opacity: 0.55,
-    }),
-  );
-  lino.rotation.x = -Math.PI / 2;
-  lino.position.set(0, 0.02, 48);
-  lino.receiveShadow = true;
-  root.add(lino);
 
   const placeTile = async (t: (typeof map.tiles)[0]) => {
     if (t.tile === 'gate-door') return;
@@ -302,168 +524,28 @@ export async function buildWardLevel(
     for (const phase of phases.slice(1)) {
       await runPhase(phase);
     }
-    options.onProgress?.({ phase: 'ready', done: total, total, label: 'Ward 7 ready' });
+    options.onProgress?.({ phase: 'ready', done: total, total, label: 'Ward 7 ready (Kenney)' });
   };
 
-  if (options.fastPlay !== false) {
-    void streamRest();
-  } else {
-    await streamRest();
-  }
-
-  for (const sign of WARD_SIGNS) {
-    root.add(makeSign(sign.text, sign.x, sign.z, sign.rot ?? 0));
-  }
-
-  for (const spec of map.interacts) {
-    const mesh = makeInteractMesh(spec);
-    root.add(mesh);
-    const gated = Boolean(spec.requires);
-    interactables.push({
-      id: spec.id,
-      kind: spec.kind as InteractKind,
-      mesh,
-      label: spec.label,
-      enabled: !gated,
-      once: true,
-      data: spec.gate ? { locked: true } : undefined,
-      requires: spec.requires,
-    });
-    if (gated) mesh.visible = false;
-    if (spec.blocks) {
-      blockers.set(spec.id, blockerFromSpec(spec));
-    }
-  }
+  if (options.fastPlay !== false) void streamRest();
+  else await streamRest();
 
   const checkpoints: Record<string, THREE.Vector3> = {};
-  for (const c of map.checkpoints) {
-    checkpoints[c.id] = new THREE.Vector3(c.x, 0.85, c.z);
-  }
-
+  for (const c of map.checkpoints) checkpoints[c.id] = new THREE.Vector3(c.x, 0.85, c.z);
   const spawns: Record<string, THREE.Vector3> = {};
-  for (const s of map.spawns) {
-    spawns[s.id] = new THREE.Vector3(s.x, 0.85, s.z);
-  }
+  for (const s of map.spawns) spawns[s.id] = new THREE.Vector3(s.x, 0.85, s.z);
 
-  const zones: Record<string, THREE.Vector3> = {
-    lobby: new THREE.Vector3(0, 0, 4),
-    nurses: new THREE.Vector3(-8, 0, 12),
-    ups: new THREE.Vector3(6.4, 0, 12),
-    dayroom: new THREE.Vector3(8, 0, 36),
-    pharmacy: new THREE.Vector3(8, 0, 44),
-    lucid: new THREE.Vector3(-7.5, 0, 44),
-    sub: new THREE.Vector3(0, 0, 66),
-    theater: new THREE.Vector3(0, 0, 88),
-    tunnel: new THREE.Vector3(0, 0, 100),
-  };
-
-  const hideNodes = [
-    new THREE.Vector3(-1.6, 0, 5),
-    new THREE.Vector3(-9.5, 0, 13.5),
-    new THREE.Vector3(-7.5, 0, 29),
-    new THREE.Vector3(9.5, 0, 37.5),
-    new THREE.Vector3(-1.6, 0, 67),
-  ];
-
-  const activeBlockers = (): Aabb2[] => [...blockers.values()];
-
-  const inWalkChannel = (x: number, z: number) => {
-    const gx = Math.round(x / CELL);
-    const gz = Math.round(z / CELL);
-    const tryCell = (cx: number, cz: number, radius: number) => {
-      if (!walkable.has(`${cx},${cz}`)) return false;
-      return Math.hypot(x - cx * CELL, z - cz * CELL) <= radius;
-    };
-    if (tryCell(gx, gz, WALK_RADIUS + 0.15)) return true;
-    for (const [ox, oz] of [
-      [1, 0],
-      [-1, 0],
-      [0, 1],
-      [0, -1],
-    ] as const) {
-      const key = `${gx + ox},${gz + oz}`;
-      if (!walkable.has(key)) continue;
-      const wide =
-        walkable.has(`${gx + ox + 1},${gz + oz}`) || walkable.has(`${gx + ox},${gz + oz + 1}`);
-      if (tryCell(gx + ox, gz + oz, wide ? CELL * 1.2 : WALK_RADIUS + 0.15)) return true;
-    }
-    return false;
-  };
-
-  const solidHit = (x: number, z: number) =>
-    hitsAnyAabb(x, z, walls, PLAYER_RADIUS) || hitsAnyAabb(x, z, activeBlockers(), PLAYER_RADIUS);
-
-  const canStand = (x: number, z: number) => {
-    if (!inWalkChannel(x, z)) return false;
-    if (solidHit(x, z)) return false;
-    return true;
-  };
-
-  const resolveMove = (x: number, z: number) => {
-    if (canStand(x, z)) return { x, z };
-    const solids = [...walls, ...activeBlockers()];
-    const pushed = resolveAabbOverlap(x, z, solids, PLAYER_RADIUS);
-    if (canStand(pushed.x, pushed.z)) return pushed;
-    // Axis slide: try X-only / Z-only from last good (caller supplies desired)
-    return { x, z };
-  };
-
-  return {
+  return finishLevel({
+    scene,
     map,
     lighting,
-    interactables,
-    checkpoints,
-    spawns,
-    zones,
-    walkable,
+    root,
     walls,
     blockers,
-    hideNodes,
-    root,
-    setFogAct: (act) => lighting.setFogAct(act),
-    setBlocker: (id, active) => {
-      const it = interactables.find((i) => i.id === id);
-      if (!active) {
-        blockers.delete(id);
-        if (it) {
-          it.enabled = false;
-          it.consumed = true;
-          it.mesh.visible = false;
-          if (it.data) it.data.locked = false;
-        }
-      } else if (it) {
-        const spec = map.interacts.find((s) => s.id === id);
-        if (spec?.blocks) blockers.set(id, blockerFromSpec(spec));
-      }
-    },
-    nearestInteractable: (pos, maxDist = 2.2) => {
-      let best: Interactable | null = null;
-      let bestD = maxDist;
-      for (const it of interactables) {
-        if (!it.enabled || it.consumed) continue;
-        const reach = it.kind === 'ups' ? Math.max(maxDist, 2.8) : maxDist;
-        const d = pos.distanceTo(it.mesh.position);
-        if (d < bestD && d <= reach) {
-          bestD = d;
-          best = it;
-        }
-      }
-      return best;
-    },
-    canStand,
-    resolveMove,
-    dispose: () => {
-      lighting.dispose();
-      scene.remove(root);
-      root.traverse((o) => {
-        const m = o as THREE.Mesh;
-        if (m.isMesh) {
-          m.geometry?.dispose();
-          const mat = m.material;
-          if (Array.isArray(mat)) mat.forEach((x) => x.dispose());
-          else mat?.dispose();
-        }
-      });
-    },
-  };
+    walkable,
+    interactSpecs: map.interacts,
+    checkpoints,
+    spawns,
+    blenderMap: false,
+  });
 }

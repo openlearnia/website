@@ -435,12 +435,15 @@ export async function mountHorrorGame(
         battery: player?.getBattery() ?? null,
         flags: { ...state.flags },
         objective: state.objective,
+        blenderMap: level!.blenderMap,
         walls: level!.walls.length,
         blockers: [...level!.blockers.keys()],
         canStandCenter: level!.canStand(0, 4),
-        canStandWall: level!.canStand(1.6, 4),
+        // Lobby walls sit at |x|≈3.2 (corridor at ≈1.55) — probe the lobby face
+        canStandWall: level!.canStand(3.4, 4),
         canStandGate: level!.canStand(0, 14),
-        canStandUps: level!.canStand(6.4, 12),
+        canStandUpsApproach: level!.canStand(5.4, 12),
+        canStandUps: level!.canStand(6.6, 12),
         badgeEnabled: level!.interactables.filter((i) => i.kind === 'badge').map((i) => ({
           id: i.id,
           enabled: i.enabled,

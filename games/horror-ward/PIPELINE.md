@@ -3,11 +3,12 @@
 **Route:** `/games/horror-ward`  
 **Code:** `website/src/games/horror-ward/`  
 **Assets:** `website/public/games/horror-ward/assets/`  
-**Layout:** see `LAYOUT.md` + `wardMap.ts` (CELL=4 Kenney grid)
+**Primary map:** Blender `assets/maps/ward7.glb` — see `BLENDER_PIPELINE.md`  
+**Fallback layout:** `LAYOUT.md` + `wardMap.ts` (CELL=4 Kenney grid, only if GLB missing)
 
 ## Engine
 
-**Three.js only** (Babylon.js removed). PointerLock FPS, FogExp2, SpotLight flashlight, progressive GLB load.
+**Three.js only** (Babylon.js removed). PointerLock FPS, FogExp2, SpotLight flashlight. Blender ward loads as one GLB; Kenney progressive tiles are fallback only.
 
 ## How to play
 

@@ -16,6 +16,22 @@
     ]
   },
   {
+    "slug": "pdf-tools",
+    "name": "PDF Tools",
+    "tagline": "Privacy-first PDF utilities that run entirely in your browser.",
+    "description": "Merge, split, delete, reorder, rotate, watermark, and convert images ↔ PDF — all on your device. Nothing is uploaded.",
+    "type": "web",
+    "platform": "Browser",
+    "url": "https://pdf-tools.openlearnia.com",
+    "github": "https://github.com/openlearnia/pdf-tools",
+    "features": [
+      "Merge, split, delete, reorder, and rotate pages",
+      "Text watermark and images ↔ PDF conversion",
+      "Client-side processing with pdf-lib and pdf.js",
+      "All processing happens on your device"
+    ]
+  },
+  {
     "slug": "json-toolkit",
     "name": "JSON Toolkit",
     "tagline": "Format, validate, and minify JSON in the browser.",

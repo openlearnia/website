@@ -7,6 +7,7 @@ import { createAudioDirector } from './audio';
 import { createHud } from './hud';
 import { createInitialState, canReachEndingC, type GameState, type EndingId } from './state';
 import { loadGlobalLightPref, saveGlobalLightPref } from './lighting';
+import { DUNGEON_Y } from './wardMap';
 
 export type GameHandle = {
   state: GameState;
@@ -393,8 +394,23 @@ export async function mountHorrorGame(
           if ((x as THREE.MeshBasicMaterial).isMeshBasicMaterial) basics += 1;
         }
       });
+      const tileBox = new THREE.Box3();
+      let hasTile = false;
+      for (const c of level!.root.children) {
+        if (!/corridor|room_|lobby|nurses|bay|utility|dayroom|theater/i.test(c.name)) continue;
+        tileBox.expandByObject(c);
+        hasTile = true;
+      }
+      const look = new THREE.Vector3();
+      camera.getWorldDirection(look);
       return {
         cam: { x: camera.position.x, y: camera.position.y, z: camera.position.z },
+        look: { x: look.x, y: look.y, z: look.z },
+        tileY: hasTile
+          ? { min: tileBox.min.y, max: tileBox.max.y, floorTopApprox: 0 }
+          : null,
+        dungeonY: DUNGEON_Y,
+        aboveFloor: camera.position.y > 0.5,
         children: level!.root.children.length,
         meshes,
         standards,
@@ -687,7 +703,13 @@ export async function mountHorrorGame(
         theater: level.zones.theater,
       };
       const spot = spots[at];
-      if (spot) player.teleport(new THREE.Vector3(spot.x, 0.85, spot.z));
+      if (spot) {
+        // Face +Z down the authored spine (walls left/right, open path center).
+        player.teleport(new THREE.Vector3(spot.x, 0.85, spot.z), Math.PI);
+      }
+    }
+    if (params.get('light') === '1') {
+      level.lighting.setGlobalLighting(true);
     }
     if (params.get('safe') === '1') {
       for (const e of enemies) e.setActive(false);

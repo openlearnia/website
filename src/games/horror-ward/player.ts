@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 import type { FlashlightHandle } from './lighting';
+import { EYE_HEIGHT } from './wardMap';
 
 export type PlayerSense = {
   position: THREE.Vector3;
@@ -28,7 +29,7 @@ export type PlayerController = {
   onStunKey: (cb: () => void) => void;
   struggleTap: () => void;
   consumeStruggle: () => number;
-  teleport: (pos: THREE.Vector3) => void;
+  teleport: (pos: THREE.Vector3, yawRad?: number) => void;
   update: (dt: number, canStand: (x: number, z: number) => boolean) => void;
   dispose: () => void;
 };
@@ -48,8 +49,8 @@ export function createFpsPlayer(
   } = {},
 ): PlayerController {
   const spawn = options.spawn ?? new THREE.Vector3(0, 0.85, 2);
-  const eyeStand = 1.55;
-  const eyeCrouch = 1.05;
+  const eyeStand = EYE_HEIGHT;
+  const eyeCrouch = EYE_HEIGHT - 0.5;
   let battery = 100;
   let stamina = 100;
   let enabled = true;
@@ -229,9 +230,14 @@ export function createFpsPlayer(
       struggle = 0;
       return n;
     },
-    teleport: (p) => {
+    teleport: (p, yawRad) => {
       camera.position.set(p.x, eyeStand, p.z);
       body.position.set(p.x, 0.85, p.z);
+      // Default camera looks −Z; yaw 0 keeps that. π faces +Z down the ward spine.
+      if (yawRad != null) {
+        camera.rotation.set(0, yawRad, 0);
+        camera.quaternion.setFromEuler(camera.rotation);
+      }
     },
     update,
     dispose: () => {

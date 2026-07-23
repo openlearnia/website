@@ -7,6 +7,7 @@ import {
   PROP_FILE,
   CELL,
   DUNGEON_Y,
+  WALK_RADIUS,
   cellWorld,
   phaseOrder,
   tilesInPhase,
@@ -132,10 +133,16 @@ export async function buildWardLevel(
   const placeProp = async (p: (typeof map.props)[0]) => {
     const path = PROP_FILE[p.prop];
     const model = await loadModel(path, { name: p.id });
+    // Sit on walkable floor (y=0). Nudge if GLB dips below origin (beds etc.).
     model.position.set(p.x, 0, p.z);
     if (p.rot) model.rotation.y = (p.rot * Math.PI) / 180;
     if (p.scale) model.scale.setScalar(p.scale);
     root.add(model);
+    model.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(model);
+    if (Number.isFinite(box.min.y) && box.min.y < -0.01) {
+      model.position.y += -box.min.y;
+    }
   };
 
   const placeLights = (phase: LoadPhase) => {
@@ -231,25 +238,24 @@ export async function buildWardLevel(
   const canStand = (x: number, z: number) => {
     const gx = Math.round(x / CELL);
     const gz = Math.round(z / CELL);
-    // Soft margin: also allow half-cell neighbors if any nearby cell walkable
-    for (let dx = -0; dx <= 0; dx++) {
-      for (let dz = -0; dz <= 0; dz++) {
-        if (walkable.has(`${gx + dx},${gz + dz}`)) return true;
-      }
-    }
-    // Slightly forgiving: check 4-neighborhood for corridor edges
+    // Rooms get a larger footprint; corridors stay inside wall faces (~±1.4).
+    const tryCell = (cx: number, cz: number, radius: number) => {
+      if (!walkable.has(`${cx},${cz}`)) return false;
+      return Math.hypot(x - cx * CELL, z - cz * CELL) <= radius;
+    };
+    if (tryCell(gx, gz, WALK_RADIUS)) return true;
+    // Soft edge: allow stepping into neighboring walkable cells (junctions / rooms)
     for (const [ox, oz] of [
-      [0, 0],
       [1, 0],
       [-1, 0],
       [0, 1],
       [0, -1],
     ] as const) {
-      if (walkable.has(`${gx + ox},${gz + oz}`)) {
-        const cx = (gx + ox) * CELL;
-        const cz = (gz + oz) * CELL;
-        if (Math.hypot(x - cx, z - cz) < CELL * 0.72) return true;
-      }
+      // Rooms expand to 3×3 / 5×5 — use wider radius there
+      const key = `${gx + ox},${gz + oz}`;
+      if (!walkable.has(key)) continue;
+      const wide = walkable.has(`${gx + ox + 1},${gz + oz}`) || walkable.has(`${gx + ox},${gz + oz + 1}`);
+      if (tryCell(gx + ox, gz + oz, wide ? CELL * 1.2 : WALK_RADIUS)) return true;
     }
     return false;
   };

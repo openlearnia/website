@@ -32,6 +32,7 @@ export function createHorrorEngine(host: HTMLElement): HorrorEngineBundle {
   scene.fog = new THREE.FogExp2(0x0a1210, 0.028);
 
   const camera = new THREE.PerspectiveCamera(70, 1, 0.05, 120);
+  // Match EYE_HEIGHT / walkable y=0 (see wardMap.ts) — never spawn under the slab.
   camera.position.set(0, 1.55, 2);
   scene.add(camera);
 

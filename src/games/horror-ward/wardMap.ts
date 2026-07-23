@@ -2,13 +2,26 @@
  * Ward 7 floor-plan — Kenney Modular Dungeon grid (game-engine tilemap skill).
  *
  * CELL = 4. room-small = 12×12 → center 2 cells off spine.
- * DUNGEON_Y = 1 lifts kit floors (local y=-1) to walkable y≈0.
+ * Kenney kit: floor TOP at local y=0, walls to ~4.
+ * DUNGEON_Y = 0 → walkable world y≈0 (eye ~1.55, props on floor).
+ *
+ * Kenney corridor AXIS (raycast-verified):
+ *   rot 0   → open ±X (east–west), walls on ±Z
+ *   rot 90  → open ±Z (north–south), walls on ±X  ← spine default
+ *   end 270 → open +Z only; end 90 → open −Z only
+ *   end 0   → open +X only; end 180 → open −X only
+ * Wrong rot puts wall slabs across the walk path (looks like “floors in the hall”).
  *
  * Load phases: lobby (gz≤3) first → bay → mid → deep.
  */
 
 export const CELL = 4;
-export const DUNGEON_Y = 1;
+/** World Y of tile root. Keep 0 so kit floor top == walkable plane. */
+export const DUNGEON_Y = 0;
+/** Eye height above walkable floor (FPS camera). */
+export const EYE_HEIGHT = 1.55;
+/** Stay inside corridor walls (~1.4m from cell center to wall face). */
+export const WALK_RADIUS = 1.25;
 export const ASSET_ROOT = '/games/horror-ward/assets';
 
 export type LoadPhase = 'lobby' | 'bay' | 'mid' | 'deep';
@@ -17,6 +30,7 @@ export type TileId =
   | 'corridor'
   | 'corridor-corner'
   | 'corridor-junction'
+  | 'corridor-intersection'
   | 'corridor-end'
   | 'corridor-wide'
   | 'room-small'
@@ -111,48 +125,53 @@ export const WARD7_MAP: WardMap = {
   name: 'Ashford Ward 7',
   cell: CELL,
   tiles: [
-    { gx: 0, gz: 0, tile: 'corridor-end', rot: 180, room: 'lobby_south' },
-    { gx: 0, gz: 1, tile: 'corridor', room: 'lobby' },
-    { gx: 0, gz: 2, tile: 'corridor', room: 'lobby' },
-    { gx: 0, gz: 3, tile: 'corridor-junction', room: 'nurses_hub' },
+    // Spine runs +Z — Kenney corridor needs rot 90 (open ±Z). rot 0 walls block the path.
+    { gx: 0, gz: 0, tile: 'corridor-end', rot: 270, room: 'lobby_south' },
+    { gx: 0, gz: 1, tile: 'corridor', rot: 90, room: 'lobby' },
+    { gx: 0, gz: 2, tile: 'corridor', rot: 90, room: 'lobby' },
+    { gx: 0, gz: 3, tile: 'corridor-intersection', room: 'nurses_hub' },
     { gx: -2, gz: 3, tile: 'room-small', rot: 90, room: 'nurses_station' },
-    { gx: 1, gz: 3, tile: 'corridor', rot: 90, room: 'utility' },
-    { gx: 2, gz: 3, tile: 'corridor-end', rot: 90, room: 'utility_ups' },
+    // EW utility spur — rot 0 opens ±X
+    { gx: 1, gz: 3, tile: 'corridor', rot: 0, room: 'utility' },
+    { gx: 2, gz: 3, tile: 'corridor-end', rot: 180, room: 'utility_ups' },
 
-    { gx: 0, gz: 4, tile: 'corridor', room: 'bay_b_gate' },
-    { gx: 0, gz: 5, tile: 'corridor', room: 'bay_b' },
-    { gx: 0, gz: 6, tile: 'corridor', room: 'bay_b' },
-    { gx: 0, gz: 7, tile: 'corridor-junction', room: 'bay_b_mid' },
-    { gx: -1, gz: 7, tile: 'corridor', rot: 270, room: 'patient_alcove_w' },
-    { gx: -2, gz: 7, tile: 'corridor-end', rot: 270, room: 'patient_alcove_w' },
-    { gx: 1, gz: 7, tile: 'corridor', rot: 90, room: 'patient_alcove_e' },
-    { gx: 2, gz: 7, tile: 'corridor-end', rot: 90, room: 'patient_alcove_e' },
-    { gx: 0, gz: 8, tile: 'corridor', room: 'bay_b' },
+    { gx: 0, gz: 4, tile: 'corridor', rot: 90, room: 'bay_b_gate' },
+    { gx: 0, gz: 5, tile: 'corridor', rot: 90, room: 'bay_b' },
+    { gx: 0, gz: 6, tile: 'corridor', rot: 90, room: 'bay_b' },
+    { gx: 0, gz: 7, tile: 'corridor-intersection', room: 'bay_b_mid' },
+    { gx: -1, gz: 7, tile: 'corridor', rot: 0, room: 'patient_alcove_w' },
+    { gx: -2, gz: 7, tile: 'corridor-end', rot: 0, room: 'patient_alcove_w' },
+    { gx: 1, gz: 7, tile: 'corridor', rot: 0, room: 'patient_alcove_e' },
+    { gx: 2, gz: 7, tile: 'corridor-end', rot: 180, room: 'patient_alcove_e' },
+    { gx: 0, gz: 8, tile: 'corridor', rot: 90, room: 'bay_b' },
 
-    { gx: 0, gz: 9, tile: 'corridor-junction', room: 'dayroom_hub' },
+    // T: open N/S/E (dayroom east)
+    { gx: 0, gz: 9, tile: 'corridor-junction', rot: 270, room: 'dayroom_hub' },
     { gx: 2, gz: 9, tile: 'room-small', rot: 270, room: 'dayroom' },
-    { gx: 0, gz: 10, tile: 'corridor', room: 'hall' },
-    { gx: 0, gz: 11, tile: 'corridor-junction', room: 'pharm_hub' },
+    { gx: 0, gz: 10, tile: 'corridor', rot: 90, room: 'hall' },
+    { gx: 0, gz: 11, tile: 'corridor-intersection', room: 'pharm_hub' },
     { gx: 2, gz: 11, tile: 'room-small', rot: 270, room: 'pharmacy' },
-    { gx: -1, gz: 11, tile: 'corridor', rot: 270, room: 'lucid_hall' },
-    { gx: -2, gz: 11, tile: 'corridor-end', rot: 270, room: 'lucid_room' },
+    { gx: -1, gz: 11, tile: 'corridor', rot: 0, room: 'lucid_hall' },
+    { gx: -2, gz: 11, tile: 'corridor-end', rot: 0, room: 'lucid_room' },
 
-    { gx: 0, gz: 12, tile: 'corridor', room: 'stair_approach' },
-    { gx: 0, gz: 13, tile: 'corridor', room: 'stairwell' },
-    { gx: 0, gz: 14, tile: 'corridor', room: 'stair_landing' },
+    { gx: 0, gz: 12, tile: 'corridor', rot: 90, room: 'stair_approach' },
+    { gx: 0, gz: 13, tile: 'corridor', rot: 90, room: 'stairwell' },
+    { gx: 0, gz: 14, tile: 'corridor', rot: 90, room: 'stair_landing' },
 
-    { gx: 0, gz: 15, tile: 'corridor', room: 'sub' },
-    { gx: 0, gz: 16, tile: 'corridor', room: 'sub' },
-    { gx: 0, gz: 17, tile: 'corridor', room: 'sub' },
-    { gx: 0, gz: 18, tile: 'corridor-junction', room: 'gallery_hub' },
-    { gx: -1, gz: 18, tile: 'corridor', rot: 270, room: 'gallery_booth' },
-    { gx: -2, gz: 18, tile: 'corridor-end', rot: 270, room: 'gallery_booth' },
-    { gx: 0, gz: 19, tile: 'corridor', room: 'gallery' },
+    { gx: 0, gz: 15, tile: 'corridor', rot: 90, room: 'sub' },
+    { gx: 0, gz: 16, tile: 'corridor', rot: 90, room: 'sub' },
+    { gx: 0, gz: 17, tile: 'corridor', rot: 90, room: 'sub' },
+    // T: open N/S/W (gallery booth west)
+    { gx: 0, gz: 18, tile: 'corridor-junction', rot: 90, room: 'gallery_hub' },
+    { gx: -1, gz: 18, tile: 'corridor', rot: 0, room: 'gallery_booth' },
+    { gx: -2, gz: 18, tile: 'corridor-end', rot: 0, room: 'gallery_booth' },
+    { gx: 0, gz: 19, tile: 'corridor', rot: 90, room: 'gallery' },
 
-    { gx: 0, gz: 20, tile: 'corridor-junction', room: 'theater_approach' },
+    { gx: 0, gz: 20, tile: 'corridor', rot: 90, room: 'theater_approach' },
+    { gx: 0, gz: 21, tile: 'corridor', rot: 90, room: 'theater_link' },
     { gx: 0, gz: 22, tile: 'room-small', rot: 0, room: 'theater' },
-    { gx: 0, gz: 24, tile: 'corridor', room: 'tunnel' },
-    { gx: 0, gz: 25, tile: 'corridor-end', rot: 0, room: 'tunnel_exit' },
+    { gx: 0, gz: 24, tile: 'corridor', rot: 90, room: 'tunnel' },
+    { gx: 0, gz: 25, tile: 'corridor-end', rot: 90, room: 'tunnel_exit' },
   ],
   props: [
     { id: 'nurses_desk', prop: 'desk', x: -8, z: 12, rot: 90 },
@@ -214,6 +233,7 @@ export const TILE_FILE: Record<TileId, string> = {
   corridor: 'corridor.glb',
   'corridor-corner': 'corridor-corner.glb',
   'corridor-junction': 'corridor-junction.glb',
+  'corridor-intersection': 'corridor-intersection.glb',
   'corridor-end': 'corridor-end.glb',
   'corridor-wide': 'corridor-wide.glb',
   'room-small': 'room-small.glb',
@@ -221,6 +241,21 @@ export const TILE_FILE: Record<TileId, string> = {
   stairs: 'stairs.glb',
   'gate-door': 'gate-door.glb',
 };
+
+/** True when a corridor piece on the +Z spine has open ±Z (walls left/right). */
+export function isSpineCorridorRot(tile: TileId, rot = 0): boolean {
+  if (tile === 'corridor' || tile === 'corridor-wide') return ((rot % 360) + 360) % 360 === 90;
+  if (tile === 'corridor-end') {
+    const r = ((rot % 360) + 360) % 360;
+    return r === 90 || r === 270;
+  }
+  if (tile === 'corridor-intersection') return true;
+  if (tile === 'corridor-junction') {
+    const r = ((rot % 360) + 360) % 360;
+    return r === 90 || r === 270;
+  }
+  return true;
+}
 
 export const PROP_FILE: Record<PropId, string> = {
   desk: 'models/props/furniture/desk.glb',

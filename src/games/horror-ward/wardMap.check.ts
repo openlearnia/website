@@ -1,5 +1,5 @@
 /**
- * ponytail: assert walkable + phase helpers — fails if floorplan math regresses.
+ * ponytail: assert walkable + Kenney corridor axis — fails if floorplan math regresses.
  * Run: npx --yes tsx src/games/horror-ward/wardMap.check.ts
  */
 import {
@@ -8,7 +8,11 @@ import {
   phaseForGz,
   tilesInPhase,
   CELL,
+  DUNGEON_Y,
+  EYE_HEIGHT,
+  WALK_RADIUS,
   cellWorld,
+  isSpineCorridorRot,
 } from './wardMap.ts';
 
 function assert(cond: boolean, msg: string) {
@@ -27,8 +31,36 @@ assert(CELL === 4, 'CELL=4');
 const c = cellWorld(2, 3);
 assert(c.x === 8 && c.z === 12, 'cellWorld');
 
-// No Math.random in map props
+assert(DUNGEON_Y === 0, 'DUNGEON_Y must be 0 (floor top == world 0)');
+assert(EYE_HEIGHT > 1.2 && EYE_HEIGHT < 2.0, 'EYE_HEIGHT sane for standing FPS');
+assert(EYE_HEIGHT > DUNGEON_Y + 1.0, 'eye must clear walkable floor by ≥1m');
+assert(WALK_RADIUS < 1.5, 'WALK_RADIUS must stay inside Kenney wall faces (~1.4)');
+
+// Spine tiles at gx=0 must open ±Z (rot 90 for straight corridor)
+for (const t of WARD7_MAP.tiles) {
+  if (t.gx !== 0) continue;
+  if (t.tile === 'room-small' || t.tile === 'room-large' || t.tile === 'gate-door') continue;
+  assert(
+    isSpineCorridorRot(t.tile, t.rot ?? 0),
+    `spine tile ${t.tile}@gz=${t.gz} rot=${t.rot ?? 0} blocks +Z path`,
+  );
+}
+
+// EW spurs must NOT use spine rot 90 on plain corridor
+for (const t of WARD7_MAP.tiles) {
+  if (t.gx === 0) continue;
+  if (t.tile !== 'corridor') continue;
+  const r = ((t.rot ?? 0) % 360 + 360) % 360;
+  assert(r === 0 || r === 180, `EW corridor ${t.room} should be rot 0/180, got ${r}`);
+}
+
 const src = JSON.stringify(WARD7_MAP.props);
 assert(!src.includes('random'), 'props authored');
 
-console.log('wardMap.check.ts OK', { walkable: walk.size, tiles: WARD7_MAP.tiles.length });
+console.log('wardMap.check.ts OK', {
+  walkable: walk.size,
+  tiles: WARD7_MAP.tiles.length,
+  DUNGEON_Y,
+  EYE_HEIGHT,
+  WALK_RADIUS,
+});

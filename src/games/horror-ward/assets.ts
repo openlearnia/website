@@ -36,6 +36,10 @@ export async function loadModel(
   if (!template) {
     const url = assetUrl(relativePath);
     try {
+      // Kenney dungeon GLBs reference Textures/colormap.png next to the file.
+      const slash = url.lastIndexOf('/');
+      const resourcePath = slash >= 0 ? url.slice(0, slash + 1) : '';
+      loader.setResourcePath(resourcePath);
       const gltf = await loader.loadAsync(url);
       template = gltf.scene;
       template.traverse((o) => {
@@ -43,7 +47,11 @@ export async function loadModel(
         if (m.isMesh) {
           m.castShadow = true;
           m.receiveShadow = true;
-          // Kenney dungeon uses vertex colors / single colormap — keep as-is
+          const mats = Array.isArray(m.material) ? m.material : [m.material];
+          for (const mat of mats) {
+            const std = mat as THREE.MeshStandardMaterial;
+            if (std?.map) std.map.colorSpace = THREE.SRGBColorSpace;
+          }
         }
       });
       cache.set(relativePath, template);

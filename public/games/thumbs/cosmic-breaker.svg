@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="Cosmic Breaker thumbnail">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1220"/>
+      <stop offset="100%" stop-color="#152038"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="#6ea8fe" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#6ea8fe" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#bg)"/>
+  <rect width="640" height="360" fill="url(#glow)"/>
+  <g>
+    <rect x="80" y="70" width="70" height="28" rx="6" fill="#f28b82"/>
+    <rect x="160" y="70" width="70" height="28" rx="6" fill="#f5a623"/>
+    <rect x="240" y="70" width="70" height="28" rx="6" fill="#3dd68c"/>
+    <rect x="320" y="70" width="70" height="28" rx="6" fill="#6ea8fe"/>
+    <rect x="400" y="70" width="70" height="28" rx="6" fill="#c084fc"/>
+    <rect x="480" y="70" width="70" height="28" rx="6" fill="#f28b82"/>
+    <rect x="120" y="110" width="70" height="28" rx="6" fill="#6ea8fe"/>
+    <rect x="200" y="110" width="70" height="28" rx="6" fill="#c084fc"/>
+    <rect x="280" y="110" width="70" height="28" rx="6" fill="#f5a623"/>
+    <rect x="360" y="110" width="70" height="28" rx="6" fill="#3dd68c"/>
+    <rect x="440" y="110" width="70" height="28" rx="6" fill="#6ea8fe"/>
+  </g>
+  <circle cx="320" cy="210" r="10" fill="#e8eaed"/>
+  <circle cx="320" cy="210" r="18" fill="none" stroke="#6ea8fe" stroke-width="2" opacity="0.7"/>
+  <rect x="250" y="300" width="140" height="18" rx="9" fill="#6ea8fe"/>
+  <text x="32" y="330" fill="#9aa0a6" font-family="Segoe UI, sans-serif" font-size="18">Cosmic Breaker</text>
+</svg>

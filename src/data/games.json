@@ -1,0 +1,22 @@
+[
+  {
+    "slug": "cosmic-breaker",
+    "name": "Cosmic Breaker",
+    "tagline": "Neon brick-breaker — smash crystals, catch power-ups, chase a high score.",
+    "framework": "Phaser 3",
+    "dimension": "2D",
+    "controls": "Arrow keys / A-D or drag to move · Space / tap to launch · F or Fullscreen button",
+    "thumbnail": "/games/thumbs/cosmic-breaker.svg",
+    "status": "playable"
+  },
+  {
+    "slug": "ring-runner",
+    "name": "Ring Runner",
+    "tagline": "Thread glowing rings in deep space — 3D flight with keyboard or touch tilt.",
+    "framework": "Three.js",
+    "dimension": "3D",
+    "controls": "Arrow keys / WASD or tilt stick · Space / tap to boost · F or Fullscreen button",
+    "thumbnail": "/games/thumbs/ring-runner.svg",
+    "status": "playable"
+  }
+]

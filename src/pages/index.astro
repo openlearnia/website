@@ -1,14 +1,16 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ToolCard from '../components/ToolCard.astro';
+import GameCard from '../components/GameCard.astro';
 import tools from '../data/tools.json';
+import games from '../data/games.json';
 
 const browserTools = tools.filter((t) => t.type === 'web');
 const desktopTools = tools.filter((t) => t.type === 'desktop');
 ---
 <BaseLayout
   title="Openlearnia — Open-Source Browser Tools & Learning Projects"
-  description="Privacy-first open-source tools you can run today — image utilities, JSON toolkit, Markdown editor, Database Lab, and more."
+  description="Privacy-first open-source tools and browser games you can run today — image utilities, JSON toolkit, Canvas games, and more."
 >
   <section class="hero reveal" aria-labelledby="hero-heading">
     <p class="brand-mark" aria-hidden="true">Openlearnia</p>
@@ -18,9 +20,7 @@ const desktopTools = tools.filter((t) => t.type === 'desktop');
     </p>
     <div class="cta-row reveal-delay-1">
       <a class="btn btn-primary" href="/tools">Browse tools</a>
-      <a class="btn btn-ghost" href="https://github.com/openlearnia" target="_blank" rel="noopener noreferrer">
-        View on GitHub
-      </a>
+      <a class="btn btn-ghost" href="/games">Play games</a>
     </div>
   </section>
 
@@ -31,6 +31,16 @@ const desktopTools = tools.filter((t) => t.type === 'desktop');
     </div>
     <div class="tool-grid">
       {browserTools.map((tool) => <ToolCard tool={tool} />)}
+    </div>
+  </section>
+
+  <section class="reveal reveal-delay-2" aria-labelledby="games-heading">
+    <div class="section-head">
+      <h2 id="games-heading">Games</h2>
+      <p>{games.length} Canvas / WebGL · play in-browser</p>
+    </div>
+    <div class="tool-grid">
+      {games.map((game) => <GameCard game={game} />)}
     </div>
   </section>
 

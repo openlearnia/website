@@ -1,0 +1,297 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import games from '../../data/games.json';
+
+export function getStaticPaths() {
+  return games.map((game) => ({
+    params: { slug: game.slug },
+    props: { game },
+  }));
+}
+
+interface Game {
+  slug: string;
+  name: string;
+  tagline: string;
+  framework: string;
+  dimension: string;
+  controls: string;
+  thumbnail: string;
+  status: string;
+}
+
+interface Props {
+  game: Game;
+}
+
+const { game } = Astro.props;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'VideoGame',
+  name: game.name,
+  description: game.tagline,
+  url: `https://openlearnia.com/games/${game.slug}`,
+  genre: game.dimension === '3D' ? 'Action' : 'Arcade',
+  gamePlatform: 'Web Browser',
+  author: { '@type': 'Organization', name: 'Openlearnia', url: 'https://openlearnia.com' },
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+};
+---
+<BaseLayout
+  title={`${game.name} — Play free in your browser`}
+  description={`${game.tagline} Built with ${game.framework}. Free, no install.`}
+  canonicalPath={`/games/${game.slug}`}
+  jsonLd={jsonLd}
+>
+  <div class="game-page reveal">
+    <nav class="game-crumb" aria-label="Breadcrumb">
+      <a href="/games">Games</a>
+      <span aria-hidden="true">/</span>
+      <span>{game.name}</span>
+    </nav>
+
+    <header class="game-page-head">
+      <div>
+        <h1>{game.name}</h1>
+        <p>{game.tagline}</p>
+      </div>
+      <div class="game-badges">
+        <span class="badge">{game.dimension}</span>
+        <span class="badge">{game.framework}</span>
+      </div>
+    </header>
+
+    <div id="game-shell" class="game-shell" data-game-shell>
+      <div class="game-shell-bar">
+        <span class="game-shell-hint">F · double-click canvas · Esc to exit</span>
+        <button type="button" id="game-fs-btn" class="btn btn-ghost game-fs-btn" aria-pressed="false">
+          Fullscreen
+        </button>
+      </div>
+      <div
+        id="game-host"
+        class="game-host"
+        data-game={game.slug}
+        role="application"
+        aria-label={`${game.name} game canvas`}
+      ></div>
+    </div>
+
+    <section id="about" class="game-about">
+      <h2>How to play</h2>
+      <p>{game.controls} · Fullscreen: button, F, or double-click the play area</p>
+      <p class="game-about-meta">
+        Runs locally in your browser ·
+        <a href="/games/ATTRIBUTION.md">Asset attribution</a> ·
+        <a href="/games">All games</a>
+      </p>
+    </section>
+  </div>
+</BaseLayout>
+
+<script>
+  import { attachFullscreen } from '../../games/fullscreen';
+
+  const shell = document.getElementById('game-shell');
+  const host = document.getElementById('game-host');
+  const fsBtn = document.getElementById('game-fs-btn');
+
+  let destroyGame: (() => void) | undefined;
+  let destroyFs: (() => void) | undefined;
+
+  if (shell instanceof HTMLElement && host && fsBtn instanceof HTMLButtonElement) {
+    const fs = attachFullscreen({
+      shell,
+      button: fsBtn,
+      clickTarget: host,
+      enableDoubleClick: true,
+    });
+    destroyFs = () => fs.destroy();
+
+    const slug = host.dataset.game;
+    (async () => {
+      if (slug === 'cosmic-breaker') {
+        const { mountCosmicBreaker } = await import('../../games/cosmic-breaker/main');
+        destroyGame = mountCosmicBreaker(host);
+      } else if (slug === 'ring-runner') {
+        const { mountRingRunner } = await import('../../games/ring-runner/main');
+        destroyGame = mountRingRunner(host);
+      }
+    })();
+  }
+
+  document.addEventListener(
+    'astro:before-swap',
+    () => {
+      destroyGame?.();
+      destroyFs?.();
+    },
+    { once: true },
+  );
+</script>
+
+<style is:global>
+  /* CSS fullscreen fallback — maximizes play surface, hides site chrome */
+  html.game-css-fullscreen-active {
+    overflow: hidden;
+  }
+
+  html.game-css-fullscreen-active .site-header,
+  html.game-css-fullscreen-active .site-footer,
+  html.game-css-fullscreen-active .game-crumb,
+  html.game-css-fullscreen-active .game-page-head,
+  html.game-css-fullscreen-active .game-about {
+    display: none !important;
+  }
+
+  html.game-css-fullscreen-active .site-main {
+    max-width: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  html.game-css-fullscreen-active .game-page {
+    gap: 0;
+  }
+
+  .game-shell.is-css-fullscreen,
+  .game-shell:fullscreen,
+  .game-shell:-webkit-full-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    border-radius: 0;
+    border: none;
+    background: #050810;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .game-shell.is-css-fullscreen .game-host,
+  .game-shell:fullscreen .game-host,
+  .game-shell:-webkit-full-screen .game-host {
+    flex: 1;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    border: none;
+    border-radius: 0;
+  }
+
+  .game-shell.is-css-fullscreen .game-shell-bar,
+  .game-shell:fullscreen .game-shell-bar,
+  .game-shell:-webkit-full-screen .game-shell-bar {
+    background: rgba(15, 17, 23, 0.85);
+    border-bottom-color: #2a2f3a;
+  }
+</style>
+
+<style>
+  .game-page {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .game-crumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+
+  .game-crumb a {
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .game-crumb a:hover {
+    color: var(--accent);
+  }
+
+  .game-page-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .game-page-head h1 {
+    margin-bottom: 0.35rem;
+  }
+
+  .game-page-head p {
+    margin: 0;
+  }
+
+  .game-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .game-shell {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: #0b1220;
+  }
+
+  .game-shell-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    padding: 0.5rem 0.75rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .game-shell-hint {
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  .game-fs-btn {
+    min-height: 2.25rem;
+    padding: 0.35rem 0.9rem;
+    font-size: 0.9rem;
+  }
+
+  .game-host {
+    width: 100%;
+    min-height: min(70vh, 640px);
+    height: min(70vh, 640px);
+    background: #0b1220;
+    overflow: hidden;
+    touch-action: none;
+  }
+
+  .game-about h2 {
+    margin-top: 0.5rem;
+  }
+
+  .game-about-meta {
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 640px) {
+    .game-host {
+      min-height: 420px;
+      height: 56vh;
+    }
+
+    .game-shell-hint {
+      display: none;
+    }
+  }
+</style>

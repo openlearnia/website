@@ -1,0 +1,58 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import GameCard from '../../components/GameCard.astro';
+import games from '../../data/games.json';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'Openlearnia Games',
+  description: 'Free browser Canvas and WebGL games from Openlearnia — play instantly, no install.',
+  url: 'https://openlearnia.com/games',
+  isPartOf: { '@type': 'WebSite', name: 'Openlearnia', url: 'https://openlearnia.com' },
+};
+---
+<BaseLayout
+  title="Games — Free browser Canvas & WebGL play"
+  description="Play free open-source browser games from Openlearnia — Cosmic Breaker (2D) and Ring Runner (3D). No install, runs in your browser."
+  canonicalPath="/games"
+  jsonLd={jsonLd}
+>
+  <div class="page-intro reveal">
+    <h1>Games</h1>
+    <p>
+      Lightweight Canvas and WebGL games that run entirely in your browser — keyboard and touch friendly,
+      no accounts, no downloads.
+    </p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href={`#${games[0]?.slug ?? 'list'}`}>Jump to games</a>
+      <a class="btn btn-ghost" href="/tools">Browse tools</a>
+    </div>
+  </div>
+
+  <section id="list" class="reveal reveal-delay-1" aria-labelledby="games-heading">
+    <div class="section-head">
+      <h2 id="games-heading">Play now</h2>
+      <p>{games.length} games · local-only</p>
+    </div>
+    <div class="tool-grid">
+      {games.map((game) => (
+        <div id={game.slug}>
+          <GameCard game={game} heading="h3" />
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <p class="games-note reveal reveal-delay-2">
+    Asset notes and licenses live in
+    <a href="/games/ATTRIBUTION.md">/games/ATTRIBUTION.md</a>.
+  </p>
+</BaseLayout>
+
+<style>
+  .games-note {
+    margin-top: 2rem;
+    font-size: 0.9rem;
+  }
+</style>
